@@ -1,0 +1,180 @@
+# -------- BOOKS --------
+The Alchemist by Paulo Coelho|499|120|Books
+Atomic Habits by James Clear|599|90|Books
+The Subtle Art of Not Giving a F*ck|549|80|Books
+Becoming by Michelle Obama|699|60|Books
+Ikigai by Héctor García|399|75|Books
+1984 by George Orwell|449|50|Books
+Rich Dad Poor Dad|499|110|Books
+The Psychology of Money|599|100|Books
+Sapiens by Yuval Noah Harari|749|65|Books
+Deep Work by Cal Newport|499|85|Books
+The Lean Startup|699|40|Books
+The Power of Habit|599|120|Books
+Think and Grow Rich|449|90|Books
+You Can Win by Shiv Khera|399|70|Books
+Man’s Search for Meaning|399|80|Books
+Zero to One by Peter Thiel|699|55|Books
+Can’t Hurt Me by David Goggins|749|40|Books
+Educated by Tara Westover|549|60|Books
+The 5 AM Club|599|70|Books
+The Monk Who Sold His Ferrari|449|90|Books
+
+# -------- ELECTRONICS --------
+Apple iPhone 15|79999|45|Electronics
+Samsung Galaxy S24|74999|60|Electronics
+Google Pixel 9 Pro|79999|50|Electronics
+OnePlus 12|64999|65|Electronics
+Xiaomi 14 Pro|54999|70|Electronics
+Sony Bravia 55-inch 4K TV|84999|20|Electronics
+LG OLED C3 65-inch TV|159999|15|Electronics
+Dell XPS 13|129999|30|Electronics
+HP Spectre x360|139999|25|Electronics
+Lenovo ThinkPad X1 Carbon|149999|20|Electronics
+Asus ZenBook 14|99999|35|Electronics
+Acer Swift 5|84999|40|Electronics
+Microsoft Surface Laptop 5|129999|25|Electronics
+Apple MacBook Air M3|124999|30|Electronics
+Dell Inspiron 15|67999|50|Electronics
+Asus ROG Zephyrus G14|149999|20|Electronics
+HP Envy 13|94999|40|Electronics
+Apple iPad Pro 12.9|119999|35|Electronics
+Samsung Galaxy Tab S9|89999|30|Electronics
+Amazon Kindle Oasis|24999|60|Electronics
+Apple Watch Series 9|45999|50|Electronics
+Samsung Galaxy Watch 6|32999|55|Electronics
+Google Nest Hub 2|9999|70|Electronics
+Apple AirTag 4-Pack|9490|120|Electronics
+Anker PowerCore 20000|4999|90|Electronics
+
+# -------- AUDIO --------
+Sony WH-1000XM5|29999|40|Audio
+Bose QuietComfort Ultra|32999|35|Audio
+Apple AirPods Pro 2|24999|80|Audio
+JBL Charge 5 Speaker|13999|60|Audio
+Marshall Emberton II|14999|45|Audio
+Sony WF-1000XM5|19999|70|Audio
+Sennheiser Momentum 4|29999|30|Audio
+boAt Rockerz 550|2999|90|Audio
+Zebronics Soundbar Z900|8999|50|Audio
+Sony XB13 Portable Speaker|4499|65|Audio
+JBL Tune 760NC|7999|55|Audio
+Logitech Z407 Speaker|9999|40|Audio
+Anker Soundcore Life Q30|8999|75|Audio
+Beats Studio Pro|29999|30|Audio
+Bose SoundLink Revolve+|21999|40|Audio
+Philips TAH8506BK|12999|50|Audio
+Jabra Elite 8 Active|15999|45|Audio
+Realme Buds Air 5|3999|100|Audio
+Skullcandy Hesh ANC|7999|65|Audio
+Noise Evolve 3|5999|80|Audio
+
+# -------- GAMING --------
+Sony PlayStation 5|49999|20|Gaming
+Microsoft Xbox Series X|49999|25|Gaming
+Nintendo Switch OLED|34999|30|Gaming
+ASUS ROG Ally|69999|25|Gaming
+Steam Deck 512GB|64999|20|Gaming
+Razer BlackWidow V4 Keyboard|13999|45|Gaming
+Logitech G Pro Wireless Mouse|9999|50|Gaming
+Corsair K70 RGB MK.2|11999|35|Gaming
+Cosmic Byte GS410 Headset|1999|60|Gaming
+Alienware Aurora R16|189999|10|Gaming
+Razer Kraken V3|9999|55|Gaming
+Asus TUF Gaming Monitor 27"|21999|40|Gaming
+Logitech G923 Racing Wheel|34999|25|Gaming
+HyperX Cloud Alpha|8499|60|Gaming
+MSI Katana GF66 Laptop|89999|25|Gaming
+Acer Nitro 5 Laptop|84999|30|Gaming
+Zotac RTX 4070 GPU|69999|15|Gaming
+Razer Seiren Mini Mic|4999|80|Gaming
+Elgato Stream Deck|11999|40|Gaming
+BenQ Zowie XL2546K|49999|20|Gaming
+
+# -------- FITNESS --------
+Fitbit Charge 6|14999|80|Fitness
+Garmin Forerunner 265|32999|35|Fitness
+Apple Watch Ultra 2|79999|30|Fitness
+Noise ColorFit Pulse|2499|120|Fitness
+Amazfit GTR 4|17999|50|Fitness
+Decathlon Yoga Mat|999|150|Fitness
+Adidas Dumbbell Set|3499|60|Fitness
+Nike Jump Rope|699|100|Fitness
+Reebok Resistance Band|499|90|Fitness
+Bowflex Adjustable Dumbbells|49999|20|Fitness
+Fitbit Inspire 3|9999|75|Fitness
+MI Smart Band 8|3499|110|Fitness
+OnePlus Watch 2|16999|65|Fitness
+Samsung Galaxy Fit 3|6999|80|Fitness
+PowerMax Treadmill 5000|59999|10|Fitness
+Reach Exercise Bike E300|24999|15|Fitness
+Smart Weighing Scale|1999|95|Fitness
+Decathlon Foam Roller|1599|85|Fitness
+Under Armour Water Bottle|999|100|Fitness
+Nike Yoga Block|799|120|Fitness
+
+# -------- HOME --------
+Philips Smart Bulb|699|100|Home
+IKEA Floor Lamp|4999|45|Home
+Dyson Air Purifier HP07|65999|25|Home
+Mi Smart LED Strip|1999|90|Home
+Google Nest Thermostat|9999|40|Home
+Amazon Echo Dot 5|4999|110|Home
+TP-Link Smart Plug|999|150|Home
+Philips Hue Starter Kit|11999|60|Home
+IKEA Curtains Smart|7999|40|Home
+Havells Ceiling Fan|4999|70|Home
+Syska Night Lamp|599|200|Home
+Bajaj Table Fan|2499|90|Home
+Crompton Air Cooler|9999|50|Home
+Dyson Vacuum V12|59999|20|Home
+Eureka Forbes Air Purifier|18999|35|Home
+Panasonic Smart Switch|1999|80|Home
+Philips Coffee Maker|3999|50|Home
+Morphy Richards Iron|2499|75|Home
+Prestige Induction Cooktop|3499|55|Home
+Godrej Door Lock|4999|60|Home
+
+# -------- APPLIANCES --------
+LG Front Load Washing Machine|44999|25|Appliances
+Samsung 340L Refrigerator|54999|20|Appliances
+Whirlpool Microwave 25L|12999|35|Appliances
+Panasonic Rice Cooker|4999|60|Appliances
+Dyson Air Purifier TP09|59999|15|Appliances
+Philips Mixer Grinder|5999|50|Appliances
+Bajaj Toaster 2-Slice|1999|120|Appliances
+LG Dishwasher 14 Place|69999|10|Appliances
+Voltas 1.5 Ton AC|46999|20|Appliances
+Blue Star Water Purifier|15999|40|Appliances
+Havells Electric Kettle|2499|90|Appliances
+IFB Convection Oven|22999|25|Appliances
+Haier Deep Freezer|29999|15|Appliances
+Croma Air Fryer|6999|50|Appliances
+Morphy Richards Blender|3999|80|Appliances
+Bosch Dryer 7kg|54999|15|Appliances
+Kent RO+UV Water Purifier|17999|35|Appliances
+Samsung Microwave 28L|15999|30|Appliances
+LG Dual Inverter AC|52999|12|Appliances
+Prestige Sandwich Maker|2999|90|Appliances
+
+# -------- ACCESSORIES --------
+Apple MagSafe Charger|4499|120|Accessories
+Samsung 45W Charger|2999|100|Accessories
+Boat Type-C Cable|699|150|Accessories
+Spigen iPhone 15 Case|1999|80|Accessories
+OtterBox Defender Case|4999|60|Accessories
+HP USB-C Dock|4999|40|Accessories
+Anker Wireless Charger|2999|90|Accessories
+Belkin HDMI Cable|999|100|Accessories
+JBL Audio Cable|799|150|Accessories
+Apple Pencil 2|10999|40|Accessories
+Samsung Stylus S Pen|4999|60|Accessories
+Mi 10000mAh Power Bank|2499|100|Accessories
+Dell Laptop Sleeve 15"|1999|75|Accessories
+Logitech Mouse Pad XL|999|120|Accessories
+HyperDrive USB-C Hub|4999|40|Accessories
+Baseus Car Charger|1499|110|Accessories
+Ugreen USB Adapter|899|100|Accessories
+Kingston 128GB Flash Drive|1299|85|Accessories
+Sandisk 1TB SSD|7999|40|Accessories
+Apple Lightning Cable|1499|150|Accessories
