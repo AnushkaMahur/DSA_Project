@@ -6,7 +6,7 @@
 #include <direct.h>   
 using namespace std;
 
-
+//Get the file path where cart data will be stored
 string getCartFilePath() {
     char buffer[1024];
     _getcwd(buffer, sizeof(buffer));
@@ -21,21 +21,25 @@ string getCartFilePath() {
     return currentPath + "\\cart_data.txt";
 }
 
+//Adding an item to the cart with a specific quantity
 bool ShoppingCart::addItem(Product* product, int quantity) {
     if (!product || quantity <= 0)
         return false;
 
+    //if requested quantity exists
     if (product->stock < quantity) {
         cout << "ERROR: Insufficient stock for " << product->name << endl;
         return false;
     }
 
+    //if product already exists in cart
     for (auto& item : items) {
         if (item.product->name == product->name) {
-            if (product->stock < item.quantity + quantity) {
+            if (product->stock < item.quantity + quantity) {    //checking availability in the stock
                 cout << "ERROR: Insufficient stock" << endl;
                 return false;
             }
+            //Update existing quantity
             item.quantity += quantity;
             cout << "SUCCESS: Updated " << product->name
                  << " quantity to " << item.quantity << endl;
@@ -44,12 +48,14 @@ bool ShoppingCart::addItem(Product* product, int quantity) {
         }
     }
 
+    // Item not already in the cart, so add as new
     items.push_back(CartItem(product, quantity));
     cout << "SUCCESS: Added " << quantity << " x " << product->name << " to cart" << endl;
     saveToFile();
     return true;
 }
 
+// Remove an entire product from the cart
 bool ShoppingCart::removeItem(const string& productName) {
     string nameLower = productName;
     transform(nameLower.begin(), nameLower.end(), nameLower.begin(), ::tolower);
@@ -70,6 +76,7 @@ bool ShoppingCart::removeItem(const string& productName) {
     return false;
 }
 
+// Display all cart items
 void ShoppingCart::showCart() {
     if (items.empty()) {
         cout << "CART_EMPTY" << endl;
@@ -84,16 +91,17 @@ void ShoppingCart::showCart() {
              << (item.quantity * item.product->price) << endl;
     }
     cout << "CART_END" << endl;
-    cout << "TOTAL: " << getTotal() << endl;
+    cout << "TOTAL: " << getTotal() << endl;    //final total amount print
 }
 
-double ShoppingCart::getTotal() {
+double ShoppingCart::getTotal() {    //total price of cart
     double total = 0.0;
     for (const auto& item : items)
         total += item.product->price * item.quantity;
     return total;
 }
 
+// Checkout process (verify stock, deduct items, and clear cart)
 void ShoppingCart::checkout(ProductManager& pm) {
     if (items.empty()) {
         cout << "ERROR: Cart is empty" << endl;
@@ -121,7 +129,7 @@ void ShoppingCart::checkout(ProductManager& pm) {
     cout << "CHECKOUT_SUCCESS" << endl;
     cout << "TOTAL_PAID: " << total << endl;
 
-    clear();
+    clear();    // Clear cart after payment
     saveToFile();  
 }
 
@@ -133,7 +141,7 @@ vector<CartItem> ShoppingCart::getItems() {
     return items;
 }
 
-
+// Load cart items from file
 void ShoppingCart::saveToFile() {
     string filePath = getCartFilePath();
     ofstream file(filePath);
@@ -141,7 +149,8 @@ void ShoppingCart::saveToFile() {
         cerr << "ERROR: Could not open " << filePath << " for writing" << endl;
         return;
     }
-
+        
+    // Write each item as: name|qty
     for (auto& item : items) {
         file << item.product->name << "|" << item.quantity << "\n";
     }
@@ -149,7 +158,7 @@ void ShoppingCart::saveToFile() {
     file.close();
 }
 
-void ShoppingCart::loadFromFile() {
+void ShoppingCart::loadFromFile() {    // Load cart from file
     string filePath = getCartFilePath();
     ifstream file(filePath);
     if (!file.is_open()) {
@@ -161,12 +170,12 @@ void ShoppingCart::loadFromFile() {
     while (getline(file, line)) {
         size_t delim = line.find('|');
         if (delim != string::npos) {
-            string name = line.substr(0, delim);
-            int qty = stoi(line.substr(delim + 1));
+            string name = line.substr(0, delim);    //product name
+            int qty = stoi(line.substr(delim + 1));    //quantity
             extern ProductManager productManager;
-            Product* p = productManager.getProduct(name);
+            Product* p = productManager.getProduct(name);     
             if (p)
-                items.push_back(CartItem(p, qty));
+                items.push_back(CartItem(p, qty));    //add to cart
         }
     }
 
