@@ -9,45 +9,51 @@ class BackendInterface:
         self.cpp_executable = cpp_executable
         self.input_file = input_file
         self.output_file = output_file
-        
+
     def execute_command(self, command):
         try:
             with open(self.input_file, 'w', encoding='utf-8') as f:
                 f.write(command.strip() + '\n')
-            
+
             with open(self.output_file, 'w', encoding='utf-8') as f:
                 f.write('')
-            
+
             result = subprocess.run([self.cpp_executable],
                                    capture_output=True,
                                    text=True,
                                    timeout=5)
-            
+
             if result.returncode != 0:
-                return {"error": f"Backend error: {result.stderr.strip() or 'Execution failed'}"}
-            
+                return {"error": result.stderr.strip() or "Execution failed"}
+
             time.sleep(0.1)
-            
+
             with open(self.output_file, 'r', encoding='utf-8') as f:
                 output = f.read()
-            
+
             return self.parse_output(output, command)
-        
+
         except subprocess.TimeoutExpired:
             return {"error": "Backend timeout"}
         except FileNotFoundError:
             return {"error": f"C++ executable not found: {self.cpp_executable}"}
         except Exception as e:
-            return {"error": f"Execution error: {str(e)}"}
-    
+            return {"error": str(e)}
+
     def parse_output(self, output, command):
         lines = output.strip().split('\n')
         if not lines or not output.strip():
             return {"error": "No output from backend"}
         if lines[0].startswith("ERROR"):
             return {"error": lines[0].replace("ERROR: ", "")}
-        
+
         cmd = command.strip().upper()
+
+        if "SEARCHFILTER" in cmd:
+            return self._parse_search_results_extended(lines)
+
+        if "LISTALLFILTER" in cmd:
+            return self._parse_product_list_extended(lines)
 
         if "SEARCHCAT" in cmd:
             return self._parse_search_results(lines)
@@ -65,12 +71,57 @@ class BackendInterface:
             return self._parse_product_list(lines)
         elif "ADD" in cmd or "REMOVE" in cmd:
             return self._parse_cart_action(lines)
-        
+
         return {"output": output}
-    
+
+    def _extract_product_extended(self, parts):
+        name = parts[0]
+        price = float(parts[1])
+        stock = int(parts[2])
+        category = parts[3]
+        rating = float(parts[4]) if len(parts) > 4 else 0.0
+        brand = parts[5] if len(parts) > 5 else ""
+        return {
+            "name": name,
+            "price": price,
+            "stock": stock,
+            "category": category,
+            "rating": rating,
+            "brand": brand
+        }
+
+    def _parse_search_results_extended(self, lines):
+        if lines[0] == "NO_RESULTS":
+            return {"products": []}
+
+        products = []
+        if lines[0] == "SEARCH_RESULTS":
+            for line in lines[1:]:
+                if line == "SEARCH_END":
+                    break
+                parts = line.split('|')
+                if len(parts) >= 4:
+                    products.append(self._extract_product_extended(parts))
+
+        return {"products": products}
+
+    def _parse_product_list_extended(self, lines):
+        products = []
+
+        if lines[0] == "ALL_PRODUCTS":
+            for line in lines[1:]:
+                if line == "PRODUCTS_END":
+                    break
+                parts = line.split('|')
+                if len(parts) >= 4:
+                    products.append(self._extract_product_extended(parts))
+
+        return {"products": products}
+
     def _parse_search_results(self, lines):
         if lines[0] == "NO_RESULTS":
             return {"products": []}
+
         products = []
         if lines[0] in ("SEARCH_RESULTS", "CATEGORY_SEARCH_RESULTS"):
             for line in lines[1:]:
@@ -85,10 +136,27 @@ class BackendInterface:
                         "category": parts[3]
                     })
         return {"products": products}
-    
+
+    def _parse_product_list(self, lines):
+        products = []
+        if lines[0] in ("ALL_PRODUCTS", "CATEGORY_PRODUCTS"):
+            for line in lines[1:]:
+                if line in ("PRODUCTS_END", "CATEGORY_PRODUCTS_END"):
+                    break
+                parts = line.split('|')
+                if len(parts) >= 4:
+                    products.append({
+                        "name": parts[0],
+                        "price": float(parts[1]),
+                        "stock": int(parts[2]),
+                        "category": parts[3]
+                    })
+        return {"products": products}
+
     def _parse_cart(self, lines):
         if lines[0] == "CART_EMPTY":
             return {"items": [], "total": 0.0}
+
         items = []
         total = 0.0
         if lines[0] == "CART_START":
@@ -107,7 +175,7 @@ class BackendInterface:
                         "subtotal": float(parts[3])
                     })
         return {"items": items, "total": total}
-    
+
     def _parse_checkout(self, lines):
         if lines[0] == "CHECKOUT_SUCCESS":
             total = 0.0
@@ -115,10 +183,11 @@ class BackendInterface:
                 total = float(lines[1].split(":")[1].strip())
             return {"success": True, "total": total}
         return {"success": False, "error": lines[0]}
-    
+
     def _parse_recommendations(self, lines):
         if lines[0] == "NO_RECOMMENDATIONS":
             return {"recommendations": []}
+
         recs = []
         if lines[0] == "RECOMMENDATIONS":
             for line in lines[1:]:
@@ -131,26 +200,16 @@ class BackendInterface:
                         "price": float(parts[1])
                     })
         return {"recommendations": recs}
-    
-    def _parse_product_list(self, lines):
-        products = []
-        if lines[0] in ("ALL_PRODUCTS", "CATEGORY_PRODUCTS"):
-            for line in lines[1:]:
-                if line in ("PRODUCTS_END", "CATEGORY_PRODUCTS_END"):
-                    break
-                parts = line.split('|')
-                if len(parts) >= 4:
-                    products.append({
-                        "name": parts[0],
-                        "price": float(parts[1]),
-                        "stock": int(parts[2]),
-                        "category": parts[3]
-                    })
-        return {"products": products}
-    
+
     def _parse_cart_action(self, lines):
         if lines[0].startswith("SUCCESS"):
             return {"success": True, "message": lines[0].replace("SUCCESS: ", "")}
         elif lines[0].startswith("ERROR"):
             return {"success": False, "error": lines[0].replace("ERROR: ", "")}
         return {"output": '\n'.join(lines)}
+
+    def list_all_filter(self, filter_string):
+        return self.execute_command(f"LISTALLFILTER {filter_string}")
+
+    def search_filter(self, query, filter_string):
+        return self.execute_command(f"SEARCHFILTER {query} | {filter_string}")
