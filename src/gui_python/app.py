@@ -1,8 +1,11 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 import sys
+import os
 from backend_interface import BackendInterface
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BACKEND_DIR = os.path.join(BASE_DIR, "..", "backend_cpp")
 
 class ECommerceApp:
     def __init__(self, root):
@@ -10,14 +13,14 @@ class ECommerceApp:
         self.root.title("Smart E-Commerce System")
         self.root.geometry("1200x750")
 
-        backend_path = "../backend_cpp/ecommerce"
-        if sys.platform == "win32":
-            backend_path = "../backend_cpp/ecommerce.exe"
+        backend_path = os.path.join(BACKEND_DIR, "ecommerce.exe")
+        input_file = os.path.join(BACKEND_DIR, "input.txt")
+        output_file = os.path.join(BACKEND_DIR, "output.txt")
 
         self.backend = BackendInterface(
             cpp_executable=backend_path,
-            input_file="../backend_cpp/input.txt",
-            output_file="../backend_cpp/output.txt"
+            input_file=input_file,
+            output_file=output_file
         )
 
         self.categories = ["Electronics", "Books", "Gaming", "Accessories",
