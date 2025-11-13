@@ -37,7 +37,7 @@ class ECommerceApp:
         self.setup_layout()
         self.show_default_message()
 
-    def setup_layout(self):
+    def setup_layout(self):  
         self.top_frame = tk.Frame(self.root, bg="#f8f9fa", height=70)
         self.top_frame.pack(fill=tk.X, side=tk.TOP)
 
@@ -50,6 +50,9 @@ class ECommerceApp:
 
         self.search_entry = tk.Entry(self.top_frame, font=("Arial", 12), width=40)
         self.search_entry.pack(side=tk.LEFT, padx=10)
+
+        self.suggestion_box = None
+        self.search_entry.bind("<KeyRelease>", self.update_autocomplete)
 
         tk.Button(
             self.top_frame,
@@ -182,6 +185,22 @@ class ECommerceApp:
             relief=tk.SUNKEN
         )
         self.status_label.pack(side=tk.BOTTOM, fill=tk.X)
+
+    def update_autocomplete(self, event):
+        print("autocomplete triggered:", event.keysym)
+        query = self.search_entry.get().strip()
+        if not query:
+            self.hide_suggestions()
+            return
+
+        result = self.backend.execute_command(f"AUTOCOMP {query}")
+        suggestions = result.get("suggestions", [])
+
+        if not suggestions:
+            self.hide_suggestions()
+            return
+
+        self.show_suggestions(suggestions)
 
     def refresh_products(self):
         if self.current_category:
@@ -475,6 +494,9 @@ class ECommerceApp:
         self.display_all_products(result.get("products", []))
 
     def display_all_products(self, products):
+        if not hasattr(self, "products_tree"):
+            return
+
         for i in self.products_tree.get_children():
             self.products_tree.delete(i)
 
