@@ -712,6 +712,25 @@ void listCategoryProducts(const string &category) {
     cout << "CATEGORY_PRODUCTS_END\n";
 }
 
+int editDistance(const string &a, const string &b) {
+    int n = a.size(), m = b.size();
+    vector<vector<int>> dp(n + 1, vector<int>(m + 1));
+
+    for (int i = 0; i <= n; i++) dp[i][0] = i;
+    for (int j = 0; j <= m; j++) dp[0][j] = j;
+
+    for (int i = 1; i <= n; i++) {
+        for (int j = 1; j <= m; j++) {
+            if (a[i - 1] == b[j - 1])
+                dp[i][j] = dp[i - 1][j - 1];
+            else
+                dp[i][j] = 1 + min({dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]});
+        }
+    }
+    return dp[n][m];
+}
+
+
 void searchCategoryProducts(const string &category, const string &query) {
     vector<Product> all = productManager.getAllProducts();
     string q = query;
@@ -720,11 +739,26 @@ void searchCategoryProducts(const string &category, const string &query) {
     vector<Product> results;
 
     for (const auto &p : all) {
+        if (p.category != category) continue;
+
         string name = p.name;
         transform(name.begin(), name.end(), name.begin(), ::tolower);
 
-        if (p.category == category && name.find(q) != string::npos)
+        stringstream ss(name);
+        string word;
+        bool fuzzy = false;
+
+        while (ss >> word) {
+            int dist = editDistance(word, q);
+            if (dist <= 2) { 
+                fuzzy = true;
+                break;
+            }
+        }
+
+        if (name.find(q) != string::npos || fuzzy) {
             results.push_back(p);
+        }
     }
 
     if (results.empty()) {
@@ -739,6 +773,7 @@ void searchCategoryProducts(const string &category, const string &query) {
     }
     cout << "CATEGORY_SEARCH_END\n";
 }
+
 
 void processCommand(const string &command) {
     stringstream ss(command);
@@ -764,7 +799,6 @@ void processCommand(const string &command) {
         }
     }
 
-
     else if (action == "SEARCH") {
         string query;
         getline(ss, query);
@@ -782,7 +816,20 @@ void processCommand(const string &command) {
             string nameLower = p.name;
             transform(nameLower.begin(), nameLower.end(), nameLower.begin(), ::tolower);
 
-            if (nameLower.find(lower) != string::npos) {
+            // Split into words
+            stringstream ss2(nameLower);
+            string word;
+            bool fuzzy = false;
+
+            while (ss2 >> word) {
+                int dist = editDistance(word, lower);
+                if (dist <= 2) {
+                    fuzzy = true;
+                    break;
+                }
+            }
+
+            if (nameLower.find(lower) != string::npos || fuzzy) {
                 cout << p.name << "|" 
                     << p.price << "|" 
                     << p.stock << "|" 
@@ -792,13 +839,9 @@ void processCommand(const string &command) {
             }
         }
 
-        if (!found) {
-            cout << "NO_RESULTS\n";
-        } else {
-            cout << "SEARCH_END\n";
-        }
+        if (!found) cout << "NO_RESULTS\n";
+        else cout << "SEARCH_END\n";
     }
-
 
 
     else if (action == "SORT") {
