@@ -1,5 +1,13 @@
 # Smart E-Commerce System
 
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.x-blue">
+  <img src="https://img.shields.io/badge/C++-17-red">
+  <img src="https://img.shields.io/badge/Platform-Windows-lightgrey">
+  <img src="https://img.shields.io/badge/Status-Active-success">
+</p>
+
+
 A full desktop-based e-commerce application built using C++ (backend) and Python Tkinter (frontend).
 The system handles core e-commerce operations such as product browsing, searching, filtering, and cart management, and demonstrates practical application of Data Structures & Algorithms.
 
