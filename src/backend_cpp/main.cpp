@@ -746,28 +746,61 @@ void processCommand(const string &command) {
     ss >> action;
     transform(action.begin(), action.end(), action.begin(), ::toupper);
 
-    if (action == "SEARCH") {
-        string query;
-        getline(ss, query);
-        if (!query.empty() && query[0] == ' ') query.erase(0,1);
+    if (action == "AUTOCOMP") {
+        string prefix;
+        getline(ss, prefix);
+        if (!prefix.empty() && prefix[0] == ' ') prefix.erase(0, 1);
 
-        vector<string> results = searchTrie.autocomplete(query);
+        vector<string> results = searchTrie.autocomplete(prefix);
 
         if (results.empty()) {
+            cout << "NO_AUTOCOMP" << endl;
+        } else {
+            cout << "AUTOCOMP_RESULTS" << endl;
+            for (const string &name : results) {
+                cout << name << endl;
+            }
+            cout << "AUTOCOMP_END" << endl;
+        }
+    }
+
+
+    else if (action == "SEARCH") {
+        string query;
+        getline(ss, query);
+        if (!query.empty() && query[0] == ' ') query.erase(0, 1);
+
+        string lower = query;
+        transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+
+        vector<Product> all = productManager.getAllProducts();
+
+        bool found = false;
+        cout << "SEARCH_RESULTS\n";
+
+        for (const auto &p : all) {
+            string nameLower = p.name;
+            transform(nameLower.begin(), nameLower.end(), nameLower.begin(), ::tolower);
+
+            if (nameLower.find(lower) != string::npos) {
+                // EXACT same field order as SORTED_RESULTS
+                cout << p.name << "|" 
+                    << p.price << "|" 
+                    << p.stock << "|" 
+                    << p.category << "|" 
+                    << p.brand << "\n";
+                found = true;
+            }
+        }
+
+        if (!found) {
             cout << "NO_RESULTS\n";
         } else {
-            cout << "SEARCH_RESULTS\n";
-
-            for (const string &name : results) {
-                Product *p = productManager.getProduct(name);
-                if (p)
-                    cout << p->name << "|" << p->price << "|" << p->stock 
-                         << "|" << p->category << "|" << p->brand << "\n";
-            }
-
             cout << "SEARCH_END\n";
         }
     }
+
+
 
     else if (action == "SORT") {
         string sortKey, category;
