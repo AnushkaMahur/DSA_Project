@@ -12,18 +12,25 @@ struct Product {
     double price;
     int stock;
     string category;
-    double rating;
     string brand;
 
-    Product() : price(0.0), stock(0), rating(0.0) {}
+    Product() : price(0.0), stock(0) {}
 };
 
 struct ProductFilters {
     double min_price = -1.0;
     double max_price = -1.0;
-    double min_rating = -1.0;
     vector<string> brands;
     string category = "";
+};
+
+// Insertion Sort
+enum SortType {
+    SORT_NONE,
+    SORT_PRICE_ASC,      // Price (Low → High)
+    SORT_PRICE_DESC,     // Price (High → Low)
+    SORT_NAME_ASC,       // Name (A → Z)
+    SORT_STOCK_DESC      // Stock (High → Low)
 };
 
 class ProductManager {
@@ -42,7 +49,10 @@ public:
     bool updateStock(const string& name, int quantity);
 
     void displayProduct(const Product& p);
+
     vector<Product> applyFilters(const vector<Product>& input, const ProductFilters& f);
+
+    vector<Product> sortProducts(vector<Product> input, SortType type);
 };
 
 #endif
