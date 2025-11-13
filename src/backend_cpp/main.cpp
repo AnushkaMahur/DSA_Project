@@ -746,26 +746,52 @@ void processCommand(const string &command) {
     ss >> action;
     transform(action.begin(), action.end(), action.begin(), ::toupper);
 
-    if (action == "SEARCH") {
-        string query;
-        getline(ss, query);
-        if (!query.empty() && query[0] == ' ') query.erase(0,1);
+    if (action == "AUTOCOMP") {
+        string prefix;
+        getline(ss, prefix);
+        if (!prefix.empty() && prefix[0] == ' ') prefix.erase(0, 1);
 
-        vector<string> results = searchTrie.autocomplete(query);
+        vector<string> results = searchTrie.autocomplete(prefix);
 
         if (results.empty()) {
-            cout << "NO_RESULTS\n";
+            cout << "NO_AUTOCOMP" << endl;
         } else {
-            cout << "SEARCH_RESULTS\n";
-
+            cout << "AUTOCOMP_RESULTS" << endl;
             for (const string &name : results) {
-                Product *p = productManager.getProduct(name);
-                if (p)
-                    cout << p->name << "|" << p->price << "|" << p->stock 
-                         << "|" << p->category << "|" << p->brand << "\n";
+                cout << name << endl;
             }
-
-            cout << "SEARCH_END\n";
+            cout << "AUTOCOMP_END" << endl;
+        }
+    }
+  
+    else if (action == "SEARCH") {
+        string query;
+        getline(ss, query);
+        if (!query.empty() && query[0] == ' ') query.erase(0, 1);
+    
+        string lower = query;
+        transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+    
+        vector<Product> all = productManager.getAllProducts();
+    
+        cout << "SEARCH_RESULTS" << endl;
+        bool found = false;
+    
+        for (const auto &p : all) {
+            string name = p.name;
+            transform(name.begin(), name.end(), name.begin(), ::tolower);
+    
+            if (name.find(lower) != string::npos) {
+                cout << p.name << "|" << p.price << "|" << p.stock << "|" << p.category
+                     << "|" << p.rating << "|" << p.brand << endl;
+                found = true;
+            }
+        }
+    
+        if (!found) {
+            cout << "NO_RESULTS" << endl;
+        } else {
+            cout << "SEARCH_END" << endl;
         }
     }
 
