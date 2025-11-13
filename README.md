@@ -13,7 +13,6 @@ The system handles core e-commerce operations such as product browsing, searchin
 To run this project locally, you need to have the following software installed:
 
 - Python 3.x
-- Node.js
 - GCC / MinGW or any C++ compiler (only if rebuilding backend)
 - Git
 
@@ -29,9 +28,9 @@ To run this project locally, you need to have the following software installed:
 ## Getting Started
 1. Clone the repository:
 
-   ```shell
-   git clone https://github.com/your-username/smart-ecommerce-system.git
-    cd smart-ecommerce-system
+   ```
+      git clone https://github.com/your-username/smart-ecommerce-system.git
+       cd smart-ecommerce-system
    ```
 
 2. Backend Setup (C++)
@@ -44,9 +43,9 @@ The backend contains the core logic:
 
 **Build:**\
 Compile the backend:
-  ```shell
-  cd backend_cpp
-  g++ -std=c++17 *.cpp -o ecommerce.exe
+  ```
+     cd backend_cpp
+     g++ -std=c++17 *.cpp -o ecommerce.exe
   ```
 
 3. Frontend Setup:
@@ -54,7 +53,7 @@ Compile the backend:
 **Navigate to the GUI directory:**
 
   ```
-    cd src/gui_python
+   cd src/gui_python
   ```
 
 **Install required Python modules**
@@ -76,16 +75,15 @@ The GUI will launch and automatically communicate with the C++ backend.
 
 ## Application Properties
 
-The backend expects product data in a .txt file.
+The backend expects product data in a `.txt` file.
 To change file paths or customize dataset:
-1.	Open the config section inside ecommerce.cpp.
-2.	Update input/output file paths as needed.\
+1.	Go to src\backend_cpp\products.txt
+2.	Update input/output file paths as needed.
    
 **Example:**
 
   ```
     products.txt  
-    orders.txt
   ```
 Save the file and recompile if changed.
 
