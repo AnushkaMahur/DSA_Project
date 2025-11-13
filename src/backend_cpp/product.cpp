@@ -3,115 +3,135 @@
 #include <sstream>
 #include <iostream>
 #include <algorithm>
+#include <cctype>
 using namespace std;
 
-void ProductManager::loadProducts(const string& filename) {
-    ifstream file(filename);
-    if (!file.is_open()) {
-        cerr << "ERROR: Cannot open " << filename << endl;
-        return;
-    }
+static inline string trim(const string &s) {
+    size_t a = s.find_first_not_of(" \t\r\n");
+    if (a == string::npos) return "";
+    size_t b = s.find_last_not_of(" \t\r\n");
+    return s.substr(a, b - a + 1);
+}
 
+void ProductManager::loadProducts(const string& filename) {
     products.clear();
+    ifstream in(filename);
+    if (!in.is_open()) return;
 
     string line;
-    while (getline(file, line)) {
-        if (line.empty() || line[0] == '#')
-            continue;
+    while (getline(in, line)) {
+        if (line.empty()) continue;
+        if (line[0] == '#') continue;
 
-        string name, priceStr, stockStr, category;
+        vector<string> parts;
+        string tmp;
+        stringstream ss(line);
+        while (getline(ss, tmp, '|')) parts.push_back(trim(tmp));
+        if (parts.size() < 4) continue;
 
-        size_t p1 = line.find('|');
-        size_t p2 = line.find('|', p1 + 1);
-        size_t p3 = line.find('|', p2 + 1);
+        Product p;
+        p.name = parts[0];
+        try { p.price = stod(parts[1]); } catch (...) { p.price = 0.0; }
+        try { p.stock = stoi(parts[2]); } catch (...) { p.stock = 0; }
+        p.category = (parts.size() > 3 ? parts[3] : "");
+        p.rating = (parts.size() > 4 ? stod(parts[4]) : 0.0);
+        p.brand = (parts.size() > 5 ? parts[5] : "");
 
-        if (p1 == string::npos || p2 == string::npos || p3 == string::npos) {
-            cerr << "Invalid line format: " << line << endl;
-            continue;
-        }
-
-        name = line.substr(0, p1);
-        priceStr = line.substr(p1 + 1, p2 - p1 - 1);
-        stockStr = line.substr(p2 + 1, p3 - p2 - 1);
-        category = line.substr(p3 + 1);
-
-        double price = 0.0;
-        int stock = 0;
-
-        try {
-            price = stod(priceStr);
-            stock = stoi(stockStr);
-        } catch (...) {
-            cerr << "Error parsing line: " << line << endl;
-            continue;
-        }
-
-        string nameLower = name;
-        transform(nameLower.begin(), nameLower.end(), nameLower.begin(), ::tolower);
-
-        products[nameLower] = Product(name, name, price, stock, category);
+        string key = p.name;
+        transform(key.begin(), key.end(), key.begin(), ::tolower);
+        products[key] = p;
     }
+    in.close();
+}
 
-    file.close();
+void ProductManager::saveProductsToFile(const string& filename) {
+    ofstream out(filename);
+    if (!out.is_open()) return;
+
+    for (auto &pr : products) {
+        const Product &p = pr.second;
+        out << p.name << "|" << p.price << "|" << p.stock << "|" << p.category
+            << "|" << p.rating << "|" << p.brand << "\n";
+    }
+    out.close();
 }
 
 Product* ProductManager::getProduct(const string& name) {
-    string nameLower = name;
-    transform(nameLower.begin(), nameLower.end(), nameLower.begin(), ::tolower);
-
-    auto it = products.find(nameLower);
-    if (it != products.end()) {
-        return &(it->second);
-    }
-    return nullptr;
+    string key = name;
+    transform(key.begin(), key.end(), key.begin(), ::tolower);
+    auto it = products.find(key);
+    if (it == products.end()) return nullptr;
+    return &it->second;
 }
 
 vector<Product> ProductManager::getAllProducts() {
+    vector<Product> v;
+    v.reserve(products.size());
+    for (auto &pr : products) v.push_back(pr.second);
+    return v;
+}
+
+vector<Product> ProductManager::getProductsByCategory(const string& category) {
     vector<Product> result;
-    for (auto& pair : products) {
-        result.push_back(pair.second);
+    string catLower = category;
+    transform(catLower.begin(), catLower.end(), catLower.begin(), ::tolower);
+
+    for (auto &pr : products) {
+        string pcat = pr.second.category;
+        string pcatLower = pcat;
+        transform(pcatLower.begin(), pcatLower.end(), pcatLower.begin(), ::tolower);
+        if (pcatLower == catLower) result.push_back(pr.second);
     }
     return result;
 }
 
 bool ProductManager::updateStock(const string& name, int quantity) {
-    Product* p = getProduct(name);
-    if (p && p->stock >= quantity) {
-        p->stock -= quantity;
-        return true;
-    }
-    return false;
+    string key = name;
+    transform(key.begin(), key.end(), key.begin(), ::tolower);
+    auto it = products.find(key);
+    if (it == products.end()) return false;
+    if (it->second.stock + quantity < 0) return false;
+    it->second.stock += quantity;
+    return true;
 }
 
 void ProductManager::displayProduct(const Product& p) {
-    cout << p.name << "|" << p.price << "|" << p.stock << "|" << p.category << endl;
+    cout << p.name << "|" << p.price << "|" << p.stock << "|" << p.category
+         << "|" << p.rating << "|" << p.brand << endl;
 }
 
-void ProductManager::saveProductsToFile(const string& filename) {
-    ofstream file(filename);
-    if (!file.is_open()) {
-        cerr << "ERROR: Could not open " << filename << " for saving updated stock" << endl;
-        return;
-    }
+vector<Product> ProductManager::applyFilters(const vector<Product>& input, const ProductFilters& f) {
+    vector<Product> out;
+    out.reserve(input.size());
 
-    for (const auto& pair : products) {
-        const Product& p = pair.second;
-        file << p.name << "|" << p.price << "|" << p.stock << "|" << p.category << "\n";
-    }
+    for (const Product &p : input) {
+        if (f.min_price >= 0.0 && p.price < f.min_price) continue;
+        if (f.max_price >= 0.0 && p.price > f.max_price) continue;
+        if (f.min_rating >= 0.0 && p.rating < f.min_rating) continue;
 
-    file.close();
-}
-vector<Product> ProductManager::getProductsByCategory(const string& category) {
-    vector<Product> result;
-    string categoryLower = category;
-    transform(categoryLower.begin(), categoryLower.end(), categoryLower.begin(), ::tolower);
-
-    for (auto& pair : products) {
-        string catLower = pair.second.category;
-        transform(catLower.begin(), catLower.end(), catLower.begin(), ::tolower);
-        if (catLower == categoryLower) {
-            result.push_back(pair.second);
+        if (!f.category.empty()) {
+            string a = p.category;
+            string b = f.category;
+            transform(a.begin(), a.end(), a.begin(), ::tolower);
+            transform(b.begin(), b.end(), b.begin(), ::tolower);
+            if (a != b) continue;
         }
+
+        if (!f.brands.empty()) {
+            bool ok = false;
+            string pbrand = p.brand;
+            transform(pbrand.begin(), pbrand.end(), pbrand.begin(), ::tolower);
+
+            for (const string &b : f.brands) {
+                string lb = b;
+                transform(lb.begin(), lb.end(), lb.begin(), ::tolower);
+                if (lb == pbrand) { ok = true; break; }
+            }
+            if (!ok) continue;
+        }
+
+        out.push_back(p);
     }
-    return result;
+
+    return out;
 }
