@@ -3,7 +3,7 @@
 #include <sstream>
 #include <algorithm>
 #include <string>
-#include <direct.h>   
+#include <direct.h>
 #include "product.h"
 #include "trie.h"
 #include "cart.h"
@@ -28,6 +28,44 @@ void setWorkingDirectory() {
     }
 }
 
+static inline string trim(const string &s) {
+    size_t a = s.find_first_not_of(" \t\r\n");
+    if (a == string::npos) return "";
+    size_t b = s.find_last_not_of(" \t\r\n");
+    return s.substr(a, b - a + 1);
+}
+
+ProductFilters parseFilterString(const string &s) {
+    ProductFilters f;
+    if (s.empty()) return f;
+    stringstream ss(s);
+    string piece;
+    while (getline(ss, piece, ';')) {
+        if (piece.empty()) continue;
+        size_t eq = piece.find('=');
+        if (eq == string::npos) continue;
+        string key = trim(piece.substr(0, eq));
+        string val = trim(piece.substr(eq + 1));
+        if (key == "min_price") {
+            try { f.min_price = stod(val); } catch(...) { f.min_price = -1.0; }
+        } else if (key == "max_price") {
+            try { f.max_price = stod(val); } catch(...) { f.max_price = -1.0; }
+        } else if (key == "min_rating") {
+            try { f.min_rating = stod(val); } catch(...) { f.min_rating = -1.0; }
+        } else if (key == "brand" || key == "brands") {
+            string tmp;
+            stringstream ss2(val);
+            while (getline(ss2, tmp, ',')) {
+                string br = trim(tmp);
+                if (!br.empty()) f.brands.push_back(br);
+            }
+        } else if (key == "category") {
+            f.category = val;
+        }
+    }
+    return f;
+}
+
 void initializeSystem() {
     setWorkingDirectory();
     productManager.loadProducts("products.txt");
@@ -50,13 +88,13 @@ void initializeSystem() {
     recommendGraph.addEdge("PlayStation 5", "PS5 Controller");
 }
 
-
 void listCategoryProducts(const string &category) {
     vector<Product> allProducts = productManager.getAllProducts();
     cout << "CATEGORY_PRODUCTS" << endl;
     for (const auto &p : allProducts) {
         if (p.category == category) {
-            cout << p.name << "|" << p.price << "|" << p.stock << "|" << p.category << endl;
+            cout << p.name << "|" << p.price << "|" << p.stock << "|" << p.category
+                 << "|" << p.rating << "|" << p.brand << endl;
         }
     }
     cout << "CATEGORY_PRODUCTS_END" << endl;
@@ -84,7 +122,8 @@ void searchCategoryProducts(const string &category, const string &query) {
 
     cout << "CATEGORY_SEARCH_RESULTS" << endl;
     for (const auto &p : results) {
-        cout << p.name << "|" << p.price << "|" << p.stock << "|" << p.category << endl;
+        cout << p.name << "|" << p.price << "|" << p.stock << "|" << p.category
+             << "|" << p.rating << "|" << p.brand << endl;
     }
     cout << "CATEGORY_SEARCH_END" << endl;
 }
@@ -98,7 +137,7 @@ void processCommand(const string &command) {
     if (action == "SEARCH") {
         string query;
         getline(ss, query);
-        query = query.substr(1);
+        if (!query.empty() && query[0] == ' ') query.erase(0,1);
 
         vector<string> results = searchTrie.autocomplete(query);
         if (results.empty()) {
@@ -108,7 +147,8 @@ void processCommand(const string &command) {
             for (const string &name : results) {
                 Product *p = productManager.getProduct(name);
                 if (p) {
-                    cout << p->name << "|" << p->price << "|" << p->stock << "|" << p->category << endl;
+                    cout << p->name << "|" << p->price << "|" << p->stock << "|" << p->category
+                         << "|" << p->rating << "|" << p->brand << endl;
                 }
             }
             cout << "SEARCH_END" << endl;
@@ -134,7 +174,7 @@ void processCommand(const string &command) {
         string productName;
         int quantity = 1;
         getline(ss, productName);
-        productName = productName.substr(1);
+        if (!productName.empty() && productName[0] == ' ') productName.erase(0,1);
 
         size_t lastSpace = productName.find_last_of(' ');
         if (lastSpace != string::npos) {
@@ -154,7 +194,7 @@ void processCommand(const string &command) {
     else if (action == "REMOVE") {
         string productName;
         getline(ss, productName);
-        productName = productName.substr(1);
+        if (!productName.empty() && productName[0] == ' ') productName.erase(0,1);
         cart.removeItem(productName);
     }
 
@@ -169,7 +209,7 @@ void processCommand(const string &command) {
     else if (action == "RECOMMEND") {
         string productName;
         getline(ss, productName);
-        productName = productName.substr(1);
+        if (!productName.empty() && productName[0] == ' ') productName.erase(0,1);
 
         vector<string> recommendations = recommendGraph.getRecommendations(productName);
         if (recommendations.empty()) {
@@ -189,9 +229,65 @@ void processCommand(const string &command) {
         vector<Product> allProducts = productManager.getAllProducts();
         cout << "ALL_PRODUCTS" << endl;
         for (const auto &p : allProducts) {
-            cout << p.name << "|" << p.price << "|" << p.stock << "|" << p.category << endl;
+            cout << p.name << "|" << p.price << "|" << p.stock << "|" << p.category
+                 << "|" << p.rating << "|" << p.brand << endl;
         }
         cout << "PRODUCTS_END" << endl;
+    }
+
+    else if (action == "LISTALLFILTER") {
+        string filters;
+        getline(ss, filters);
+        if (!filters.empty() && filters[0] == ' ') filters.erase(0,1);
+        ProductFilters pf = parseFilterString(filters);
+        vector<Product> allProducts = productManager.getAllProducts();
+        vector<Product> out = productManager.applyFilters(allProducts, pf);
+        if (out.empty()) {
+            cout << "NO_RESULTS" << endl;
+        } else {
+            cout << "ALL_PRODUCTS" << endl;
+            for (const auto &p : out) {
+                cout << p.name << "|" << p.price << "|" << p.stock << "|" << p.category
+                     << "|" << p.rating << "|" << p.brand << endl;
+            }
+            cout << "PRODUCTS_END" << endl;
+        }
+    }
+
+    else if (action == "SEARCHFILTER") {
+        string rest;
+        getline(ss, rest);
+        if (!rest.empty() && rest[0] == ' ') rest.erase(0,1);
+        string qpart;
+        string fpart;
+        size_t bar = rest.find('|');
+        if (bar != string::npos) {
+            qpart = trim(rest.substr(0, bar));
+            fpart = trim(rest.substr(bar + 1));
+        } else {
+            qpart = trim(rest);
+            fpart = "";
+        }
+
+        vector<string> results = searchTrie.autocomplete(qpart);
+        vector<Product> matched;
+        for (const string &name : results) {
+            Product *p = productManager.getProduct(name);
+            if (p) matched.push_back(*p);
+        }
+
+        ProductFilters pf = parseFilterString(fpart);
+        vector<Product> out = productManager.applyFilters(matched, pf);
+        if (out.empty()) {
+            cout << "NO_RESULTS" << endl;
+        } else {
+            cout << "SEARCH_RESULTS" << endl;
+            for (const auto &p : out) {
+                cout << p.name << "|" << p.price << "|" << p.stock << "|" << p.category
+                     << "|" << p.rating << "|" << p.brand << endl;
+            }
+            cout << "SEARCH_END" << endl;
+        }
     }
 
     else {
