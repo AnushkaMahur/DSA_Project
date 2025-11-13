@@ -26,14 +26,14 @@ To run this project locally, you need to have the following software installed:
 -  Modular, DSA-focused implementation
 
 ## Getting Started
-1. Clone the repository:
+**Clone the repository:**
 
    ```
       git clone https://github.com/your-username/smart-ecommerce-system.git
-       cd smart-ecommerce-system
+      cd smart-ecommerce-system
    ```
 
-2. Backend Setup (C++)
+## Backend Setup (C++)
 The backend contains the core logic:
 
   - Product storage
@@ -42,13 +42,13 @@ The backend contains the core logic:
   - File handling
 
 **Build:**\
-Compile the backend:
+**Compile the backend:**
   ```
      cd backend_cpp
      g++ -std=c++17 *.cpp -o ecommerce.exe
   ```
 
-3. Frontend Setup:
+## Frontend Setup:
 
 **Navigate to the GUI directory:**
 
