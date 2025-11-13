@@ -94,7 +94,8 @@ You can browse products, add items to cart, apply filters, search, and place ord
 
 ## Project Structure
 
-Smart E-Commerce System/\
+
+src/\
 |\
 |___backend_cpp/\
 |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|\
