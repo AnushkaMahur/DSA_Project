@@ -3,7 +3,7 @@ import os
 import time
 
 class BackendInterface:
-    def __init__(self, cpp_executable="../backend_cpp/ecommerce.exe",
+    def _init_(self, cpp_executable="../backend_cpp/ecommerce.exe",
                  input_file="../backend_cpp/input.txt",
                  output_file="../backend_cpp/output.txt"):
         self.cpp_executable = cpp_executable
@@ -55,6 +55,9 @@ class BackendInterface:
         if "LISTALLFILTER" in cmd:
             return self._parse_product_list_extended(lines)
 
+        if "SORT" in cmd:
+            return self._parse_sorted_results(lines)
+
         if "SEARCHCAT" in cmd:
             return self._parse_search_results(lines)
         elif "LISTCAT" in cmd:
@@ -79,16 +82,28 @@ class BackendInterface:
         price = float(parts[1])
         stock = int(parts[2])
         category = parts[3]
-        rating = float(parts[4]) if len(parts) > 4 else 0.0
-        brand = parts[5] if len(parts) > 5 else ""
+        brand = parts[4] if len(parts) > 4 else ""
         return {
             "name": name,
             "price": price,
             "stock": stock,
             "category": category,
-            "rating": rating,
             "brand": brand
         }
+
+    def _parse_sorted_results(self, lines):
+        products = []
+        if lines[0] != "SORTED_RESULTS":
+            return {"products": []}
+
+        for line in lines[1:]:
+            if line == "SORTED_END":
+                break
+            parts = line.split("|")
+            if len(parts) >= 5:
+                products.append(self._extract_product_extended(parts))
+
+        return {"products": products}
 
     def _parse_search_results_extended(self, lines):
         if lines[0] == "NO_RESULTS":
@@ -107,7 +122,6 @@ class BackendInterface:
 
     def _parse_product_list_extended(self, lines):
         products = []
-
         if lines[0] == "ALL_PRODUCTS":
             for line in lines[1:]:
                 if line == "PRODUCTS_END":
@@ -115,7 +129,6 @@ class BackendInterface:
                 parts = line.split('|')
                 if len(parts) >= 4:
                     products.append(self._extract_product_extended(parts))
-
         return {"products": products}
 
     def _parse_search_results(self, lines):
