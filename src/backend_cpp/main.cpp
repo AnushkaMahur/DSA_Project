@@ -18,7 +18,7 @@ RecommendationGraph recommendGraph;
 
 void setWorkingDirectory() {
     char buffer[1024];
-    _getcwd(buffer, sizeof(buffer)); // Get current working directory
+    _getcwd(buffer, sizeof(buffer));
     string currentPath = string(buffer);
 
     size_t pos = currentPath.find("gui_python");
@@ -38,31 +38,38 @@ static inline string trim(const string &s) {
 ProductFilters parseFilterString(const string &s) {
     ProductFilters f;
     if (s.empty()) return f;
+
     stringstream ss(s);
-    string piece;
-    while (getline(ss, piece, ';')) {
-        if (piece.empty()) continue;
-        size_t eq = piece.find('=');
+    string part;
+
+    while (getline(ss, part, ';')) {
+        if (part.empty()) continue;
+
+        size_t eq = part.find('=');
         if (eq == string::npos) continue;
-        string key = trim(piece.substr(0, eq));
-        string val = trim(piece.substr(eq + 1));
+
+        string key = trim(part.substr(0, eq));
+        string val = trim(part.substr(eq + 1));
+
         if (key == "min_price") {
-            try { f.min_price = stod(val); } catch(...) { f.min_price = -1.0; }
-        } else if (key == "max_price") {
-            try { f.max_price = stod(val); } catch(...) { f.max_price = -1.0; }
-        } else if (key == "min_rating") {
-            try { f.min_rating = stod(val); } catch(...) { f.min_rating = -1.0; }
-        } else if (key == "brand" || key == "brands") {
+            try { f.min_price = stod(val); } catch (...) {}
+        }
+        else if (key == "max_price") {
+            try { f.max_price = stod(val); } catch (...) {}
+        }
+        else if (key == "brand" || key == "brands") {
             string tmp;
             stringstream ss2(val);
             while (getline(ss2, tmp, ',')) {
-                string br = trim(tmp);
-                if (!br.empty()) f.brands.push_back(br);
+                tmp = trim(tmp);
+                if (!tmp.empty()) f.brands.push_back(tmp);
             }
-        } else if (key == "category") {
+        }
+        else if (key == "category") {
             f.category = val;
         }
     }
+
     return f;
 }
 
@@ -692,43 +699,45 @@ void initializeSystem() {
 }
 
 void listCategoryProducts(const string &category) {
-    vector<Product> allProducts = productManager.getAllProducts();
-    cout << "CATEGORY_PRODUCTS" << endl;
-    for (const auto &p : allProducts) {
+    vector<Product> all = productManager.getAllProducts();
+    cout << "CATEGORY_PRODUCTS\n";
+
+    for (const auto &p : all) {
         if (p.category == category) {
-            cout << p.name << "|" << p.price << "|" << p.stock << "|" << p.category
-                 << "|" << p.rating << "|" << p.brand << endl;
+            cout << p.name << "|" << p.price << "|" << p.stock 
+                 << "|" << p.category << "|" << p.brand << "\n";
         }
     }
-    cout << "CATEGORY_PRODUCTS_END" << endl;
+
+    cout << "CATEGORY_PRODUCTS_END\n";
 }
 
 void searchCategoryProducts(const string &category, const string &query) {
-    vector<Product> allProducts = productManager.getAllProducts();
-    string lowerQuery = query;
-    transform(lowerQuery.begin(), lowerQuery.end(), lowerQuery.begin(), ::tolower);
+    vector<Product> all = productManager.getAllProducts();
+    string q = query;
+    transform(q.begin(), q.end(), q.begin(), ::tolower);
 
     vector<Product> results;
-    for (const auto &p : allProducts) {
+
+    for (const auto &p : all) {
         string name = p.name;
-        string cat = p.category;
         transform(name.begin(), name.end(), name.begin(), ::tolower);
-        if (cat == category && name.find(lowerQuery) != string::npos) {
+
+        if (p.category == category && name.find(q) != string::npos)
             results.push_back(p);
-        }
     }
 
     if (results.empty()) {
-        cout << "NO_RESULTS" << endl;
+        cout << "NO_RESULTS\n";
         return;
     }
 
-    cout << "CATEGORY_SEARCH_RESULTS" << endl;
+    cout << "CATEGORY_SEARCH_RESULTS\n";
     for (const auto &p : results) {
-        cout << p.name << "|" << p.price << "|" << p.stock << "|" << p.category
-             << "|" << p.rating << "|" << p.brand << endl;
+        cout << p.name << "|" << p.price << "|" << p.stock 
+             << "|" << p.category << "|" << p.brand << "\n";
     }
-    cout << "CATEGORY_SEARCH_END" << endl;
+    cout << "CATEGORY_SEARCH_END\n";
 }
 
 void processCommand(const string &command) {
@@ -743,47 +752,81 @@ void processCommand(const string &command) {
         if (!query.empty() && query[0] == ' ') query.erase(0,1);
 
         vector<string> results = searchTrie.autocomplete(query);
+
         if (results.empty()) {
-            cout << "NO_RESULTS" << endl;
+            cout << "NO_RESULTS\n";
         } else {
-            cout << "SEARCH_RESULTS" << endl;
+            cout << "SEARCH_RESULTS\n";
+
             for (const string &name : results) {
                 Product *p = productManager.getProduct(name);
-                if (p) {
-                    cout << p->name << "|" << p->price << "|" << p->stock << "|" << p->category
-                         << "|" << p->rating << "|" << p->brand << endl;
-                }
+                if (p)
+                    cout << p->name << "|" << p->price << "|" << p->stock 
+                         << "|" << p->category << "|" << p->brand << "\n";
             }
-            cout << "SEARCH_END" << endl;
+
+            cout << "SEARCH_END\n";
         }
     }
 
+    else if (action == "SORT") {
+        string sortKey, category;
+        ss >> sortKey;
+
+        getline(ss, category);
+        if (!category.empty() && category[0] == ' ') category.erase(0,1);
+
+        SortType type = SORT_NONE;
+
+        if (sortKey == "PRICE_ASC") type = SORT_PRICE_ASC;
+        else if (sortKey == "PRICE_DESC") type = SORT_PRICE_DESC;
+        else if (sortKey == "NAME_ASC") type = SORT_NAME_ASC;
+        else if (sortKey == "STOCK_DESC") type = SORT_STOCK_DESC;
+
+        vector<Product> list;
+
+        if (category.empty())
+            list = productManager.getAllProducts();
+        else
+            list = productManager.getProductsByCategory(category);
+
+        list = productManager.sortProducts(list, type);
+
+        cout << "SORTED_RESULTS\n";
+        for (auto &p : list) {
+            cout << p.name << "|" << p.price << "|" << p.stock 
+                 << "|" << p.category << "|" << p.brand << "\n";
+        }
+        cout << "SORTED_END\n";
+    }
+
     else if (action == "SEARCHCAT") {
-        string category, query;
-        ss >> category;
-        getline(ss, query);
-        if (!query.empty() && query[0] == ' ') query.erase(0, 1);
-        searchCategoryProducts(category, query);
+        string cat, q;
+        ss >> cat;
+        getline(ss, q);
+        if (!q.empty() && q[0] == ' ') q.erase(0,1);
+        searchCategoryProducts(cat, q);
     }
 
     else if (action == "LISTCAT") {
         string category;
         getline(ss, category);
-        if (!category.empty() && category[0] == ' ') category.erase(0, 1);
+        if (!category.empty() && category[0] == ' ') category.erase(0,1);
         listCategoryProducts(category);
     }
 
     else if (action == "ADD") {
         string productName;
         int quantity = 1;
+
         getline(ss, productName);
         if (!productName.empty() && productName[0] == ' ') productName.erase(0,1);
 
-        size_t lastSpace = productName.find_last_of(' ');
-        if (lastSpace != string::npos) {
+        size_t pos = productName.find_last_of(' ');
+        if (pos != string::npos) {
             try {
-                quantity = stoi(productName.substr(lastSpace + 1));
-                productName = productName.substr(0, lastSpace);
+                quantity = stoi(productName.substr(pos + 1));
+                productName = productName.substr(0, pos);
             } catch (...) {}
         }
 
@@ -791,7 +834,7 @@ void processCommand(const string &command) {
         if (p)
             cart.addItem(p, quantity);
         else
-            cout << "ERROR: Product not found" << endl;
+            cout << "ERROR: Product not found\n";
     }
 
     else if (action == "REMOVE") {
@@ -814,87 +857,58 @@ void processCommand(const string &command) {
         getline(ss, productName);
         if (!productName.empty() && productName[0] == ' ') productName.erase(0,1);
 
-        vector<string> recommendations = recommendGraph.getRecommendations(productName);
-        if (recommendations.empty()) {
-            cout << "NO_RECOMMENDATIONS" << endl;
+        vector<string> recs = recommendGraph.getRecommendations(productName);
+
+        if (recs.empty()) {
+            cout << "NO_RECOMMENDATIONS\n";
         } else {
-            cout << "RECOMMENDATIONS" << endl;
-            for (const string &recName : recommendations) {
-                Product *p = productManager.getProduct(recName);
+            cout << "RECOMMENDATIONS\n";
+
+            for (const string &r : recs) {
+                Product *p = productManager.getProduct(r);
                 if (p)
-                    cout << p->name << "|" << p->price << endl;
+                    cout << p->name << "|" << p->price << "\n";
             }
-            cout << "RECOMMEND_END" << endl;
+
+            cout << "RECOMMEND_END\n";
         }
     }
 
     else if (action == "LISTALL") {
-        vector<Product> allProducts = productManager.getAllProducts();
-        cout << "ALL_PRODUCTS" << endl;
-        for (const auto &p : allProducts) {
-            cout << p.name << "|" << p.price << "|" << p.stock << "|" << p.category
-                 << "|" << p.rating << "|" << p.brand << endl;
+        vector<Product> all = productManager.getAllProducts();
+        cout << "ALL_PRODUCTS\n";
+
+        for (const auto &p : all) {
+            cout << p.name << "|" << p.price << "|" << p.stock 
+                 << "|" << p.category << "|" << p.brand << "\n";
         }
-        cout << "PRODUCTS_END" << endl;
+
+        cout << "PRODUCTS_END\n";
     }
 
     else if (action == "LISTALLFILTER") {
-        string filters;
-        getline(ss, filters);
-        if (!filters.empty() && filters[0] == ' ') filters.erase(0,1);
-        ProductFilters pf = parseFilterString(filters);
-        vector<Product> allProducts = productManager.getAllProducts();
-        vector<Product> out = productManager.applyFilters(allProducts, pf);
+        string fs;
+        getline(ss, fs);
+        if (!fs.empty() && fs[0] == ' ') fs.erase(0,1);
+
+        ProductFilters f = parseFilterString(fs);
+        vector<Product> all = productManager.getAllProducts();
+        vector<Product> out = productManager.applyFilters(all, f);
+
         if (out.empty()) {
-            cout << "NO_RESULTS" << endl;
+            cout << "NO_RESULTS\n";
         } else {
-            cout << "ALL_PRODUCTS" << endl;
+            cout << "ALL_PRODUCTS\n";
             for (const auto &p : out) {
-                cout << p.name << "|" << p.price << "|" << p.stock << "|" << p.category
-                     << "|" << p.rating << "|" << p.brand << endl;
+                cout << p.name << "|" << p.price << "|" << p.stock 
+                     << "|" << p.category << "|" << p.brand << "\n";
             }
-            cout << "PRODUCTS_END" << endl;
-        }
-    }
-
-    else if (action == "SEARCHFILTER") {
-        string rest;
-        getline(ss, rest);
-        if (!rest.empty() && rest[0] == ' ') rest.erase(0,1);
-        string qpart;
-        string fpart;
-        size_t bar = rest.find('|');
-        if (bar != string::npos) {
-            qpart = trim(rest.substr(0, bar));
-            fpart = trim(rest.substr(bar + 1));
-        } else {
-            qpart = trim(rest);
-            fpart = "";
-        }
-
-        vector<string> results = searchTrie.autocomplete(qpart);
-        vector<Product> matched;
-        for (const string &name : results) {
-            Product *p = productManager.getProduct(name);
-            if (p) matched.push_back(*p);
-        }
-
-        ProductFilters pf = parseFilterString(fpart);
-        vector<Product> out = productManager.applyFilters(matched, pf);
-        if (out.empty()) {
-            cout << "NO_RESULTS" << endl;
-        } else {
-            cout << "SEARCH_RESULTS" << endl;
-            for (const auto &p : out) {
-                cout << p.name << "|" << p.price << "|" << p.stock << "|" << p.category
-                     << "|" << p.rating << "|" << p.brand << endl;
-            }
-            cout << "SEARCH_END" << endl;
+            cout << "PRODUCTS_END\n";
         }
     }
 
     else {
-        cout << "ERROR: Unknown command" << endl;
+        cout << "ERROR: Unknown command\n";
     }
 }
 
@@ -905,21 +919,20 @@ int main() {
     ofstream outputFile("output.txt");
 
     if (!inputFile.is_open() || !outputFile.is_open()) {
-        cerr << "ERROR: Cannot open input/output files" << endl;
+        cerr << "ERROR: Cannot open input/output files\n";
         return 1;
     }
 
-    streambuf *coutBuf = cout.rdbuf();
+    streambuf *buf = cout.rdbuf();
     cout.rdbuf(outputFile.rdbuf());
 
     string command;
     while (getline(inputFile, command)) {
-        if (!command.empty() && command[0] != '#') {
+        if (!command.empty() && command[0] != '#')
             processCommand(command);
-        }
     }
 
-    cout.rdbuf(coutBuf);
+    cout.rdbuf(buf);
     inputFile.close();
     outputFile.close();
 
