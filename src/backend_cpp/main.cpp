@@ -783,7 +783,6 @@ void processCommand(const string &command) {
             transform(nameLower.begin(), nameLower.end(), nameLower.begin(), ::tolower);
 
             if (nameLower.find(lower) != string::npos) {
-                // EXACT same field order as SORTED_RESULTS
                 cout << p.name << "|" 
                     << p.price << "|" 
                     << p.stock << "|" 
