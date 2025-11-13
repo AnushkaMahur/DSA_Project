@@ -3,9 +3,7 @@ import os
 import time
 
 class BackendInterface:
-    def _init_(self, cpp_executable="../backend_cpp/ecommerce.exe",
-                 input_file="../backend_cpp/input.txt",
-                 output_file="../backend_cpp/output.txt"):
+    def __init__(self, cpp_executable, input_file, output_file):
         self.cpp_executable = cpp_executable
         self.input_file = input_file
         self.output_file = output_file
