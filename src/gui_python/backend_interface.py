@@ -55,6 +55,8 @@ class BackendInterface:
 
         if "SORT" in cmd:
             return self._parse_sorted_results(lines)
+        if "AUTOCOMP" in cmd:
+            return self._parse_autocomp(lines)
 
         if "SEARCHCAT" in cmd:
             return self._parse_search_results(lines)
@@ -211,6 +213,19 @@ class BackendInterface:
                         "price": float(parts[1])
                     })
         return {"recommendations": recs}
+
+    def _parse_autocomp(self, lines):
+        if lines[0] == "NO_AUTOCOMP":
+            return {"suggestions": []}
+
+        results = []
+        if lines[0] == "AUTOCOMP_RESULTS":
+            for line in lines[1:]:
+                if line == "AUTOCOMP_END":
+                    break
+                results.append(line.strip())
+
+        return {"suggestions": results}
 
     def _parse_cart_action(self, lines):
         if lines[0].startswith("SUCCESS"):
