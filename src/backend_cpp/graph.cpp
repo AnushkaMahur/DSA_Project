@@ -4,7 +4,9 @@
 #include <algorithm>
 #include <set>
 
+// connecting two products for recommendation
 void RecommendationGraph::addEdge(const string& product1, const string& product2) {
+    // Convert both names to lowercase
     string p1Lower = product1;
     string p2Lower = product2;
     transform(p1Lower.begin(), p1Lower.end(), p1Lower.begin(), ::tolower);
@@ -14,15 +16,16 @@ void RecommendationGraph::addEdge(const string& product1, const string& product2
     adjacencyList[p2Lower].push_back(p1Lower);
 }
 
+// Get recommended products based on a given product
 vector<string> RecommendationGraph::getRecommendations(const string& productName, int maxResults) {
     string nameLower = productName;
     transform(nameLower.begin(), nameLower.end(), nameLower.begin(), ::tolower);
     
     vector<string> recommendations;
     set<string> visited;
-    
-    if (adjacencyList.find(nameLower) != adjacencyList.end()) {
-        for (const string& neighbor : adjacencyList[nameLower]) {
+
+    if (adjacencyList.find(nameLower) != adjacencyList.end()) {    //if product exists in the graph
+        for (const string& neighbor : adjacencyList[nameLower]) {    // Loop through directly connected products
             if (visited.find(neighbor) == visited.end() && neighbor != nameLower) {
                 recommendations.push_back(neighbor);
                 visited.insert(neighbor);
@@ -43,7 +46,7 @@ void RecommendationGraph::loadRecommendations(const string& filename) {
         return; 
     }
     
-    string line;
+    string line;    // Skip empty lines or comments
     while (getline(file, line)) {
         if (line.empty() || line[0] == '#') continue;
         
