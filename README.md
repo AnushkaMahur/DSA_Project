@@ -62,8 +62,14 @@ Python GUI
 **Clone the repository:**
 
    ```
-      git clone https://github.com/your-username/smart-ecommerce-system.git
+      git clone https://github.com/AnushkaMahur/DSA_Project.git
       cd smart-ecommerce-system
+   ```
+
+**Install Libraries:**
+
+   ```
+      pip install ttkbootstrap
    ```
 
 ## Backend Setup (C++)
@@ -77,7 +83,7 @@ The backend contains the core logic:
 **Build:**\
 **Compile the backend:**
   ```
-     cd backend_cpp
+     cd src/backend_cpp
      g++ -std=c++17 *.cpp -o ecommerce.exe
   ```
 
