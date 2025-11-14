@@ -4,8 +4,10 @@
 #include <iostream>
 #include <algorithm>
 #include <cctype>
+
 using namespace std;
 
+//string trim function
 static inline string trim(const string &s) {
     size_t a = s.find_first_not_of(" \t\r\n");
     if (a == string::npos) return "";
@@ -13,6 +15,7 @@ static inline string trim(const string &s) {
     return s.substr(a, b - a + 1);
 }
 
+//loading products from .txt and storing in the map
 void ProductManager::loadProducts(const string& filename) {
     products.clear();
     ifstream in(filename);
@@ -20,13 +23,13 @@ void ProductManager::loadProducts(const string& filename) {
 
     string line;
     while (getline(in, line)) {
-        if (line.empty()) continue;
-        if (line[0] == '#') continue;
+        if (line.empty()) continue;    //skip blanks
+        if (line[0] == '#') continue;    //skip comments
 
         vector<string> parts;
         string tmp;
         stringstream ss(line);
-        while (getline(ss, tmp, '|')) parts.push_back(trim(tmp));
+        while (getline(ss, tmp, '|')) parts.push_back(trim(tmp));    //split line using '|'
         if (parts.size() < 4) continue;
 
         Product p;
@@ -38,7 +41,7 @@ void ProductManager::loadProducts(const string& filename) {
         p.category = (parts.size() > 3 ? parts[3] : "");
         p.brand = (parts.size() > 4 ? parts[4] : "");
 
-        string key = p.name;
+        string key = p.name;    // Lowercase key for consistent lookups
         transform(key.begin(), key.end(), key.begin(), ::tolower);
 
         products[key] = p;
@@ -46,10 +49,12 @@ void ProductManager::loadProducts(const string& filename) {
     in.close();
 }
 
+// Save product list back to a file
 void ProductManager::saveProductsToFile(const string& filename) {
     ofstream out(filename);
     if (!out.is_open()) return;
 
+    // Write products back in the same format
     for (auto &pr : products) {
         const Product &p = pr.second;
         out << p.name << "|" << p.price << "|" << p.stock << "|"
@@ -68,6 +73,7 @@ Product* ProductManager::getProduct(const string& name) {
     return &it->second;
 }
 
+// Return all products as a vector
 vector<Product> ProductManager::getAllProducts() {
     vector<Product> v;
     v.reserve(products.size());
@@ -78,6 +84,7 @@ vector<Product> ProductManager::getAllProducts() {
     return v;
 }
 
+// Return all products that match the category
 vector<Product> ProductManager::getProductsByCategory(const string& category) {
     vector<Product> result;
     string catLower = category;
@@ -94,6 +101,7 @@ vector<Product> ProductManager::getProductsByCategory(const string& category) {
     return result;
 }
 
+//update product stock
 bool ProductManager::updateStock(const string& name, int quantity) {
     string key = name;
     transform(key.begin(), key.end(), key.begin(), ::tolower);
@@ -101,7 +109,7 @@ bool ProductManager::updateStock(const string& name, int quantity) {
     auto it = products.find(key);
     if (it == products.end()) return false;
 
-    if (it->second.stock + quantity < 0) return false;
+    if (it->second.stock + quantity < 0) return false;    //keeping stock number non negative
 
     it->second.stock += quantity;
     return true;
@@ -112,15 +120,17 @@ void ProductManager::displayProduct(const Product& p) {
          << p.category << "|" << p.brand << endl;
 }
 
+//applying filters (price,category,brand)
 vector<Product> ProductManager::applyFilters(const vector<Product>& input, const ProductFilters& f) {
     vector<Product> out;
     out.reserve(input.size());
 
     for (const Product &p : input) {
-
+        //price filters
         if (f.min_price >= 0.0 && p.price < f.min_price) continue;
         if (f.max_price >= 0.0 && p.price > f.max_price) continue;
 
+        //category filters
         if (!f.category.empty()) {
             string a = p.category;
             string b = f.category;
@@ -129,6 +139,7 @@ vector<Product> ProductManager::applyFilters(const vector<Product>& input, const
             if (a != b) continue;
         }
 
+        //brand filters
         if (!f.brands.empty()) {
             bool ok = false;
 
@@ -153,11 +164,12 @@ vector<Product> ProductManager::applyFilters(const vector<Product>& input, const
     return out;
 }
 
+//sort products based on different sort types using insertion sort 
 vector<Product> ProductManager::sortProducts(vector<Product> list, SortType type) {
     for (int i = 1; i < list.size(); i++) {
         Product key = list[i];
         int j = i - 1;
-
+        //comparision for different sort types
         auto cmp = [&](const Product &a, const Product &b) {
             switch (type) {
                 case SORT_PRICE_ASC:
@@ -177,6 +189,7 @@ vector<Product> ProductManager::sortProducts(vector<Product> list, SortType type
             }
         };
 
+        //standard insertion sort shift
         while (j >= 0 && cmp(key, list[j])) {
             list[j + 1] = list[j];
             j--;
