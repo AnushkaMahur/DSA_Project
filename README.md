@@ -62,14 +62,8 @@ Python GUI
 **Clone the repository:**
 
    ```
-      git clone https://github.com/AnushkaMahur/DSA_Project.git
-      cd smart-ecommerce-system
-   ```
-
-**Install Libraries:**
-
-   ```
-      pip install ttkbootstrap
+   git clone https://github.com/AnushkaMahur/DSA_Project.git
+   cd smart-ecommerce-system
    ```
 
 ## Backend Setup (C++)
@@ -83,8 +77,8 @@ The backend contains the core logic:
 **Build:**\
 **Compile the backend:**
   ```
-     cd src/backend_cpp
-     g++ -std=c++17 *.cpp -o ecommerce.exe
+  cd src/backend_cpp
+  g++ -std=c++17 *.cpp -o ecommerce.exe
   ```
 
 ## Frontend Setup:
@@ -92,7 +86,7 @@ The backend contains the core logic:
 **Navigate to the GUI directory:**
 
   ```
-   cd src/gui_python
+  cd src/gui_python
   ```
 
 **Install required Python modules**
@@ -101,17 +95,18 @@ Most Tkinter installations are bundled with Python.\
 If using virtual environment:
 
   ```
-     pip install tk
+  pip install tk
   ```
-**Install ttkbootstrap (optional, for enhanced UI):**
-```
-     pip install ttkbootstrap
-```
+Install Libraries:
+
+  ```
+  pip install ttkbootstrap
+  ```
 
 **Run the application:**
 
    ```
-     python app.py
+   python app.py
    ```
 
 The GUI will launch and automatically communicate with the C++ backend.
@@ -127,7 +122,7 @@ To change file paths or customize dataset:
 **Example:**
 
   ```
-    products.txt  
+  products.txt  
   ```
 Save the file and recompile if changed.
 
