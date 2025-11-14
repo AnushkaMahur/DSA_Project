@@ -36,6 +36,8 @@ To run this project locally, you need to have the following software installed:
 - Python 3.x
 - GCC / MinGW or any C++ compiler (only if rebuilding backend)
 - Git
+- **ttkbootstrap** (optional ,for enhanced UI themes - automatically falls back to standard ttk if not available)
+
 
 ## Features
 
@@ -48,6 +50,8 @@ C++ Backend
 - File-based product database
 
 Python GUI
+- Modern, clean interface using the **Flatly theme** (via ttkbootstrap)
+- Automatic fallback to standard ttk theme if ttkbootstrap is not installed
 - Tkinter UI for user-friendly interface
 - Search with autocomplete + fuzzy matching
 - Product display and selection
@@ -93,12 +97,17 @@ If using virtual environment:
   ```
      pip install tk
   ```
+**Install ttkbootstrap (optional, for enhanced UI):**
+```
+     pip install ttkbootstrap
+```
 
 **Run the application:**
 
    ```
      python app.py
    ```
+
 The GUI will launch and automatically communicate with the C++ backend.
 
 
