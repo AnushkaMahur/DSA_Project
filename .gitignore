@@ -1,0 +1,94 @@
+#  C++ BUILD / BINARY FILES
+*.o
+*.obj
+*.out
+*.exe
+*.dll
+*.so
+*.a
+*.lib
+*.bin
+
+# CMake / Make build directories
+/build/
+/cmake-build-debug/
+/cmake-build-release/
+Makefile
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+
+# PYTHON FILES
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+.env/
+.env.bak/
+ENV/
+env/
+
+# Python build / cache
+*.egg-info/
+*.egg
+.eggs/
+dist/
+build/
+
+# IDE / EDITOR FILES
+# VSCode
+.vscode/
+*.code-workspace
+
+# CLion / JetBrains
+.idea/
+*.iml
+
+# Visual Studio
+.vs/
+*.sln
+*.vcxproj*
+*.user
+
+# OS-SPECIFIC JUNK
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# Linux
+*~
+
+# LOG FILES
+*.log
+
+# TEMP FILES
+tmp/
+temp/
+*.tmp
+*.swp
+*.swo
+
+# PROJECT-SPECIFIC
+# Compiled C++ backend binary
+src/backend_cpp/backend_app
+
+# Output files or temporary backend outputs
+output/
+results/
+cache/
+
+# GUI assets generated at runtime
+src/gui_python/assets/generated/
+
+# Product database backups
+*.bak
+
