@@ -1,5 +1,8 @@
 #include <iostream>
+#include <vector>
 #include "../../src/backend_cpp/trie.h"
+
+using namespace std;
 
 int main() {
     Trie trie;
@@ -7,13 +10,12 @@ int main() {
     trie.insert("lamp");
     trie.insert("charger");
 
-    // Test prefix search
-    auto results = trie.searchPrefix("la");
+    vector<string> results = trie.searchPrefix("la");
 
     if (results.size() == 2) {
-        std::cout << "[PASS] Trie prefix search works correctly.\n";
+        cout << "[PASS] Trie prefix search works correctly.\n";
     } else {
-        std::cout << "[FAIL] Trie prefix search returned wrong output.\n";
+        cout << "[FAIL] Trie prefix search returned wrong output.\n";
     }
 
     return 0;
