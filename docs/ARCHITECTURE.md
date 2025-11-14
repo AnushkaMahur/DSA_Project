@@ -1,4 +1,4 @@
-make this in markdown language and git compatible - # Architecture Overview
+# Architecture Overview
 
 This document describes the architecture of the system, outlining the structure, responsibilities, and design principles of each major layer.
 
