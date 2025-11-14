@@ -24,9 +24,10 @@ class ThemedFactory:
     def __init__(self, root, style_name=None):
         self.root = root
         if USE_BOOTSTRAP:
+            # load bootstrap theme
             self.style = tb.Style(theme="flatly")
 
-        #  Treeview selection color patch 
+            # Treeview selection color patch 
             self.style.configure("Treeview",
                             rowheight=28,
                             font=("Arial", 11))
@@ -35,7 +36,7 @@ class ThemedFactory:
                     foreground=[("selected", "black")])
 
         else:
-            self.style = ttk.Style()
+            self.style = ttk.Style()    #normal ttk fallback
             self.style.theme_use("clam")  
 
         #  Treeview selection color patch 
@@ -48,6 +49,7 @@ class ThemedFactory:
                         background=[("selected", "#cce7ff")],
                         foreground=[("selected", "black")])
 
+    #widget creator
     def label(self, parent, **kwargs):
         if USE_BOOTSTRAP:
             return ttk.Label(parent, **kwargs)
@@ -107,17 +109,19 @@ class ECommerceApp:
         input_file = os.path.join(BACKEND_DIR, "input.txt")
         output_file = os.path.join(BACKEND_DIR, "output.txt")
 
+        # Interface for interacting with the C++ backend
         self.backend = BackendInterface(
             cpp_executable=backend_path,
             input_file=input_file,
             output_file=output_file
         )
 
+        # Predefined product categories in UI
         self.categories = ["Electronics", "Books", "Gaming", "Accessories",
                            "Audio", "Fitness", "Home", "Appliances"]
 
         self.current_category = None
-
+        #filtering and sorting
         self.filter_min_price = tk.StringVar()
         self.filter_max_price = tk.StringVar()
         self.filter_brand = tk.StringVar()
@@ -128,7 +132,7 @@ class ECommerceApp:
         self.show_default_message()
 
     def setup_layout(self):
-        # give it subtle background by using a Frame with relief
+        #top bar with search, filters and sorting
         self.top_frame = tk.Frame(self.root, bg="#f5f7fa", height=70)
         self.top_frame.pack(fill=tk.X, side=tk.TOP)
 
@@ -139,17 +143,19 @@ class ECommerceApp:
             background="#f5f7fa"
         )
         title_label.pack(side=tk.LEFT, padx=20)
-
+        
+        #search bar
         self.search_entry = self.factory.entry(self.top_frame, font=("Arial", 12), width=40)
         self.search_entry.pack(side=tk.LEFT, padx=10)
         self.suggestion_box = None
         self.search_entry.bind("<KeyRelease>", self.update_autocomplete)
 
-
+        #search button
         search_btn = self.factory.button(self.top_frame, text="Search", width=12, command=self.search_products,
                                          bootstyle="success") if USE_BOOTSTRAP else self.factory.button(self.top_frame, text="Search", width=12, command=self.search_products, style="Accent.TButton")
         search_btn.pack(side=tk.LEFT, padx=5)
 
+        #filter button
         filters_btn = self.factory.button(self.top_frame, text="🔍 Filters", width=12, command=self.open_filter_window,
                                           bootstyle="primary" if USE_BOOTSTRAP else None)
         filters_btn.pack(side=tk.LEFT, padx=5)
@@ -157,6 +163,7 @@ class ECommerceApp:
         sort_frame = tk.Frame(self.top_frame, bg="#f5f7fa")
         sort_frame.pack(side=tk.LEFT, padx=8)
         tk.Label(sort_frame, text="Sort By:", bg="#f5f7fa").pack(side=tk.LEFT)
+        
         #creating drop-down menu for sort operations
         self.sort_dropdown = self.factory.combobox(
             sort_frame,
@@ -182,11 +189,11 @@ class ECommerceApp:
                                           bootstyle="secondary" if USE_BOOTSTRAP else None)
         refresh_btn.pack(side=tk.LEFT, padx=5)
 
-        # Body
+        # main body
         self.body_frame = tk.Frame(self.root, bg="#ffffff")
         self.body_frame.pack(fill=tk.BOTH, expand=True)
 
-        # Sidebar
+        # left sidebar 
         self.sidebar = tk.Frame(self.body_frame, width=240, bg="#e9f4ff")
         self.sidebar.pack(side=tk.LEFT, fill=tk.Y)
 
@@ -207,7 +214,7 @@ class ECommerceApp:
                                       bootstyle="info" if USE_BOOTSTRAP else None)
             btn.pack(pady=6, padx=12)
 
-        # Bottom sidebar actions
+        # Bottom sidebar actions (recommendations and view cart)
         self.sidebar_bottom = tk.Frame(self.sidebar, bg="#e9f4ff")
         self.sidebar_bottom.pack(side=tk.BOTTOM, fill=tk.X, pady=18)
 
@@ -237,6 +244,7 @@ class ECommerceApp:
         self.status_label = ttk.Label(self.root, text="Ready", font=("Arial", 10), anchor=tk.W, relief=tk.SUNKEN)
         self.status_label.pack(side=tk.BOTTOM, fill=tk.X)
 
+    #autocomplete
     def update_autocomplete(self, event):
         query = self.search_entry.get().strip()
         if not query:
@@ -282,6 +290,7 @@ class ECommerceApp:
         else:
             self.load_all_products()
 
+    #filters
     def open_filter_window(self):
         win = tk.Toplevel(self.root)
         win.title("Filters")
@@ -333,6 +342,7 @@ class ECommerceApp:
 
         self.load_filtered_table(products)
 
+    #sorting
     def apply_sort(self):
         choice = self.sort_type.get()
 
@@ -364,6 +374,7 @@ class ECommerceApp:
 
         self.load_filtered_table(products)
 
+    #table builder
     def load_filtered_table(self, products):
         product_frame = ttk.LabelFrame(self.content_frame, text="Results")
         product_frame.pack(fill=tk.BOTH, expand=True, pady=10)
@@ -396,12 +407,13 @@ class ECommerceApp:
         ttk.Label(self.content_frame, text="Welcome! Select a category from the left sidebar.",
                   font=("Arial", 16, "bold")).pack(pady=200)
 
+    #category handling
     def load_category_products(self, category):
         self.current_category = category
         self.clear_content()
 
         ttk.Label(self.content_frame, text=f"Category: {category}", font=("Arial", 18, "bold")).pack(pady=10)
-
+        #table setup
         product_frame = ttk.LabelFrame(self.content_frame, text="Products")
         product_frame.pack(fill=tk.BOTH, expand=True, pady=10)
         #create columns for each product on the view panel
@@ -437,8 +449,8 @@ class ECommerceApp:
         add_btn = self.factory.button(control_frame, text="➕ Add to Cart", command=self.add_to_cart,
                                       bootstyle="success" if USE_BOOTSTRAP else None)
         add_btn.pack(side=tk.LEFT, padx=5)
-
-        self.load_products_for_category(category)
+        # Load products for the chosen category
+        self.load_products_for_category(category) 
 
     def load_products_for_category(self, category):
         result = self.backend.execute_command(f"LISTCAT {category}")
@@ -447,6 +459,7 @@ class ECommerceApp:
             return
         self.display_products(result.get("products", []))
 
+    #view all products
     def load_all_products(self):
         self.current_category = None
         self.clear_content()
@@ -495,6 +508,7 @@ class ECommerceApp:
         self.display_all_products(result.get("products", []))
         #showcase all products on panel
 
+    #table population
     def display_all_products(self, products):
         if not hasattr(self, "products_tree"):
             return
@@ -506,6 +520,7 @@ class ECommerceApp:
             self.products_tree.insert("", tk.END, text=str(idx),
                                       values=(p["name"], f"₹{p['price']:.2f}", p["stock"], p.get("category", "")))
 
+    #search
     def search_products(self):
         query = self.search_entry.get().strip()
         #works for searching products in search bar 
@@ -539,6 +554,7 @@ class ECommerceApp:
             self.products_tree.insert("", tk.END, text=str(idx),
                                       values=(p["name"], f"₹{p['price']:.2f}", p["stock"]))
 
+    #cart
     def add_to_cart(self):
         selected = self.products_tree.selection()
         if not selected:
@@ -566,6 +582,7 @@ class ECommerceApp:
         result = self.backend.execute_command("SHOWCART")
         CartWindow(self.root, result, self.backend, self.update_cart_button)
 
+    #recommendations
     def show_recommendations(self):
         #use graphs for recommendations
         selected = None
@@ -607,6 +624,7 @@ class CartWindow:
             close_btn.pack(pady=10)
             return
 
+        #table to display cart items
         frame = tk.Frame(self.window)
         frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
@@ -617,6 +635,7 @@ class CartWindow:
             tree.heading(c, text=c)
             tree.column(c, width=120)
 
+        #insert cart rows
         for item in self.items:
             tree.insert("", tk.END,
                         values=(item["name"],
@@ -628,12 +647,14 @@ class CartWindow:
         tree.configure(yscroll=scroll.set)
         tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         scroll.pack(side=tk.RIGHT, fill=tk.Y)
-
+        
+        #footer area
         footer = tk.Frame(self.window, bg="#e0e0e0")
         footer.pack(fill=tk.X, padx=10, pady=10)
-
+        
         ttk.Label(footer, text=f"Total: ₹{self.total:.2f}", font=("Arial", 14, "bold")).pack(pady=10)
 
+        #buttons
         button_frame = tk.Frame(self.window)
         button_frame.pack(fill=tk.X, padx=10, pady=10)
 
