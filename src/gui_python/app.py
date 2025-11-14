@@ -1,4 +1,3 @@
-# ecommerce_gui_themable.py
 import tkinter as tk
 from tkinter import ttk, messagebox
 import sys
@@ -8,7 +7,7 @@ from backend_interface import BackendInterface
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 BACKEND_DIR = os.path.join(BASE_DIR, "..", "backend_cpp")
 
-# Try to use ttkbootstrap for modern themes. If not installed, fall back to ttk.
+# Using ttkbootstrap for modern themes
 USE_BOOTSTRAP = False
 try:
     import ttkbootstrap as tb
@@ -27,7 +26,7 @@ class ThemedFactory:
         if USE_BOOTSTRAP:
             self.style = tb.Style(theme="flatly")
 
-        # ---- Treeview selection color patch ----
+        #  Treeview selection color patch 
             self.style.configure("Treeview",
                             rowheight=28,
                             font=("Arial", 11))
@@ -37,9 +36,9 @@ class ThemedFactory:
 
         else:
             self.style = ttk.Style()
-            self.style.theme_use("clam")   # better control
+            self.style.theme_use("clam")  
 
-        # ---- Treeview selection color patch ----
+        #  Treeview selection color patch 
             self.style.configure("Treeview",
                                  background="white",
                                 fieldbackground="white",
@@ -56,7 +55,7 @@ class ThemedFactory:
 
     def button(self, parent, text, command=None, width=None, bootstyle=None, style=None, **kwargs):
         if USE_BOOTSTRAP:
-            # use bootstyle to control color (e.g., 'success', 'primary')
+            # use bootstyle to control color ( 'success', 'primary')
             bs = bootstyle or "secondary"
             return ttk.Button(parent, text=text, command=command, width=width, bootstyle=bs, **kwargs)
         else:
@@ -72,7 +71,6 @@ class ThemedFactory:
         return ttk.Combobox(parent, **kwargs)
 
     def spinbox(self, parent, **kwargs):
-        # ttk Spinbox is available in recent tkinter - fallback to tk.Spinbox if needed
         try:
             return ttk.Spinbox(parent, **kwargs)
         except Exception:
@@ -84,7 +82,7 @@ class ECommerceApp:
         self.root.title("Smart E-Commerce System")
         self.root.geometry("1200x750")
 
-        # theme: if ttkbootstrap available, default to 'flatly' (clean). otherwise keep default.
+        # theme: setting fized theme to 'flatty'
         if USE_BOOTSTRAP:
             self.style = tb.Style(theme="flatly")
         else:
@@ -130,7 +128,7 @@ class ECommerceApp:
         self.show_default_message()
 
     def setup_layout(self):
-        # Top frame - give it subtle background by using a Frame with relief
+        # give it subtle background by using a Frame with relief
         self.top_frame = tk.Frame(self.root, bg="#f5f7fa", height=70)
         self.top_frame.pack(fill=tk.X, side=tk.TOP)
 
@@ -159,7 +157,7 @@ class ECommerceApp:
         sort_frame = tk.Frame(self.top_frame, bg="#f5f7fa")
         sort_frame.pack(side=tk.LEFT, padx=8)
         tk.Label(sort_frame, text="Sort By:", bg="#f5f7fa").pack(side=tk.LEFT)
-
+        #creating drop-down menu for sort operations
         self.sort_dropdown = self.factory.combobox(
             sort_frame,
             textvariable=self.sort_type,
@@ -173,6 +171,7 @@ class ECommerceApp:
                 "Stock (High → Low)"
             ]
         )
+        
         self.sort_dropdown.pack(side=tk.LEFT)
 
         apply_sort_btn = self.factory.button(sort_frame, text="Apply Sort", command=self.apply_sort,
@@ -238,8 +237,6 @@ class ECommerceApp:
         self.status_label = ttk.Label(self.root, text="Ready", font=("Arial", 10), anchor=tk.W, relief=tk.SUNKEN)
         self.status_label.pack(side=tk.BOTTOM, fill=tk.X)
 
-
-    # --- existing logic unchanged, only minor adjustments to use factory widgets where needed ---
     def update_autocomplete(self, event):
         query = self.search_entry.get().strip()
         if not query:
@@ -342,14 +339,13 @@ class ECommerceApp:
         if choice == "None":
             self.refresh_products()
             return
-
+        #provide ways to perform sort operations 
         mapping = {
             "Price (Low → High)": "PRICE_ASC",
             "Price (High → Low)": "PRICE_DESC",
             "Name (A → Z)": "NAME_ASC",
             "Stock (High → Low)": "STOCK_DESC"
         }
-
         sort_key = mapping.get(choice, "PRICE_ASC")
         cmd = f"SORT {sort_key}"
 
@@ -408,7 +404,7 @@ class ECommerceApp:
 
         product_frame = ttk.LabelFrame(self.content_frame, text="Products")
         product_frame.pack(fill=tk.BOTH, expand=True, pady=10)
-
+        #create columns for each product on the view panel
         columns = ("Name", "Price", "Stock")
         self.products_tree = ttk.Treeview(product_frame, columns=columns, show="tree headings", height=15)
 
@@ -497,6 +493,7 @@ class ECommerceApp:
 
         result = self.backend.execute_command("LISTALL")
         self.display_all_products(result.get("products", []))
+        #showcase all products on panel
 
     def display_all_products(self, products):
         if not hasattr(self, "products_tree"):
@@ -511,6 +508,7 @@ class ECommerceApp:
 
     def search_products(self):
         query = self.search_entry.get().strip()
+        #works for searching products in search bar 
 
         if not query:
             if self.current_category:
@@ -546,7 +544,7 @@ class ECommerceApp:
         if not selected:
             messagebox.showwarning("Select Product", "Select a product to add.")
             return
-
+        #adding items to cart with their price and quantity 
         item = self.products_tree.item(selected[0])
         name = item["values"][0]
         qty = self.quantity_var.get()
@@ -564,10 +562,12 @@ class ECommerceApp:
             self.cart_sidebar_btn.config(text=f"🛒 View Cart ({count})")
 
     def show_cart(self):
+        #depicts cart items
         result = self.backend.execute_command("SHOWCART")
         CartWindow(self.root, result, self.backend, self.update_cart_button)
 
     def show_recommendations(self):
+        #use graphs for recommendations
         selected = None
         if hasattr(self, "products_tree"):
             sel = self.products_tree.selection()
@@ -645,6 +645,7 @@ class CartWindow:
         close_btn.pack(side=tk.RIGHT, padx=5)
 
     def remove_item(self, tree):
+        #removed the item succesfully
         selection = tree.selection()
         if not selection:
             messagebox.showwarning("Select item", "Please select an item to remove")
