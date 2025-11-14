@@ -37,7 +37,7 @@ To run this project locally, you need to have the following software installed:
 - GCC / MinGW or any C++ compiler (only if rebuilding backend)
 - Git
 
-## 🚀 Features
+## Features
 
 C++ Backend
 - Product management using OOP
