@@ -1,8 +1,7 @@
 # Code Walkthrough
 
-A guide to the Smart E-Commerce System architecture and key implementations.
+This document is guide to the Smart E-Commerce System key implementations.
 
----
 
 ## System Overview
 
@@ -11,7 +10,6 @@ A guide to the Smart E-Commerce System architecture and key implementations.
 - **Python GUI**: Tkinter interface with ttkbootstrap theming
 - **Communication**: File-based text protocol (`input.txt` / `output.txt`)
 
----
 
 ## Backend Components
 
@@ -97,7 +95,6 @@ struct CartItem {
 
 **Flow:** Read `input.txt` → Process command → Write `output.txt`
 
----
 
 ## Frontend Components
 
@@ -118,15 +115,15 @@ struct CartItem {
 **UI Layout:**
 ```
 ┌─────────────────────────────────────────┐
-│ Top Frame (Search, Filters, Sort)      │
+│ Top Frame (Search, Filters, Sort)       │
 ├──────────┬──────────────────────────────┤
-│ Sidebar  │ Content Frame               │
-│          │ (Treeview Product Display)  │
-│ - All    │                             │
-│ - Books  │                             │
-│ - Elec   │                             │
-│ - Cart   │                             │
-│ - Recs   │                             │
+│ Sidebar  │ Content Frame                │
+│          │ (Treeview Product Display)   │
+│ - All    │                              │ 
+│ - Books  │                              │
+│ - Elec   │                              │
+│ - Cart   │                              │
+│ - Recs   │                              │
 ├──────────┴──────────────────────────────┤
 │ Status Bar                              │
 └─────────────────────────────────────────┘
@@ -139,7 +136,6 @@ struct CartItem {
 - **Cart Window:** Separate window for cart management
 - **Recommendation Window:** Displays related products
 
----
 
 ## Data Flow Examples
 
@@ -162,7 +158,6 @@ View Cart → SHOWCART command → Display CartWindow → Checkout button
 → Confirmation dialog
 ```
 
----
 
 ## File Structure
 
@@ -182,7 +177,6 @@ gui_python/
 └── assets/                # UI resources
 ```
 
----
 
 ## Performance & Complexity
 
@@ -192,13 +186,8 @@ gui_python/
 - **Graph Recommendations:** O(k) where k = related products
 - **Fuzzy Search:** O(n×m×k) where n = products, m = query length, k = word length
 
----
 
 ## Error Handling
 
 **Backend:** File errors, invalid commands, stock issues (prefixed with "ERROR:")  
 **Frontend:** Subprocess timeouts (5s), parse errors, user-friendly dialogs
-
----
-
-This walkthrough covers all essential components while reducing redundancy and maintaining technical accuracy.
