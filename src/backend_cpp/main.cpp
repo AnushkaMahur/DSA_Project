@@ -18,7 +18,7 @@ RecommendationGraph recommendGraph;
 
 void setWorkingDirectory() {
     char buffer[1024];
-    _getcwd(buffer, sizeof(buffer));
+    _getcwd(buffer, sizeof(buffer));     // current directory
     string currentPath = string(buffer);
 
     size_t pos = currentPath.find("gui_python");
@@ -73,16 +73,18 @@ ProductFilters parseFilterString(const string &s) {
     return f;
 }
 
-void initializeSystem() {
-    setWorkingDirectory();
-    productManager.loadProducts("products.txt");
-    cart.loadFromFile();
+void initializeSystem() {    //loading all the products,cart data,build trie,and build recommendation graph
+    setWorkingDirectory();  
+    productManager.loadProducts("products.txt");        
+    cart.loadFromFile();    //restore cart state
 
+    //autocomplete trie
     vector<Product> allProducts = productManager.getAllProducts();
     for (const auto &product : allProducts) {
         searchTrie.insert(product.name);
     }
 
+    //edges for showing recommendations and products that are bought together
     recommendGraph.addEdge("Apple iPhone 15", "Apple MacBook Air M3");
     recommendGraph.addEdge("Apple iPhone 15", "Apple iPad Pro 12.9");
     recommendGraph.addEdge("Apple iPhone 15", "Apple Watch Series 9");
@@ -698,6 +700,7 @@ void initializeSystem() {
     recommendGraph.addEdge("Apple Pencil 2", "Apple Lightning Cable");
 }
 
+//printing products with same category
 void listCategoryProducts(const string &category) {
     vector<Product> all = productManager.getAllProducts();
     cout << "CATEGORY_PRODUCTS\n";
@@ -712,13 +715,14 @@ void listCategoryProducts(const string &category) {
     cout << "CATEGORY_PRODUCTS_END\n";
 }
 
+//fuzzy search (Levenshtein distance)
 int editDistance(const string &a, const string &b) {
     int n = a.size(), m = b.size();
     vector<vector<int>> dp(n + 1, vector<int>(m + 1));
 
     for (int i = 0; i <= n; i++) dp[i][0] = i;
     for (int j = 0; j <= m; j++) dp[0][j] = j;
-
+    
     for (int i = 1; i <= n; i++) {
         for (int j = 1; j <= m; j++) {
             if (a[i - 1] == b[j - 1])
@@ -730,7 +734,7 @@ int editDistance(const string &a, const string &b) {
     return dp[n][m];
 }
 
-
+// Search products inside a category using fuzzy matching
 void searchCategoryProducts(const string &category, const string &query) {
     vector<Product> all = productManager.getAllProducts();
     string q = query;
@@ -756,6 +760,7 @@ void searchCategoryProducts(const string &category, const string &query) {
             }
         }
 
+        //exact or fuzzy
         if (name.find(q) != string::npos || fuzzy) {
             results.push_back(p);
         }
@@ -766,6 +771,7 @@ void searchCategoryProducts(const string &category, const string &query) {
         return;
     }
 
+    //print matched items
     cout << "CATEGORY_SEARCH_RESULTS\n";
     for (const auto &p : results) {
         cout << p.name << "|" << p.price << "|" << p.stock 
@@ -799,6 +805,7 @@ void processCommand(const string &command) {
         }
     }
 
+    //search <query>
     else if (action == "SEARCH") {
         string query;
         getline(ss, query);
@@ -843,7 +850,7 @@ void processCommand(const string &command) {
         else cout << "SEARCH_END\n";
     }
 
-
+    //sorting (accending,descending order)
     else if (action == "SORT") {
         string sortKey, category;
         ss >> sortKey;
@@ -852,19 +859,20 @@ void processCommand(const string &command) {
         if (!category.empty() && category[0] == ' ') category.erase(0,1);
 
         SortType type = SORT_NONE;
-
+        
+        // map sort type
         if (sortKey == "PRICE_ASC") type = SORT_PRICE_ASC;
         else if (sortKey == "PRICE_DESC") type = SORT_PRICE_DESC;
         else if (sortKey == "NAME_ASC") type = SORT_NAME_ASC;
         else if (sortKey == "STOCK_DESC") type = SORT_STOCK_DESC;
 
         vector<Product> list;
-
-        if (category.empty())
+        
+        if (category.empty())        //choose category
             list = productManager.getAllProducts();
         else
             list = productManager.getProductsByCategory(category);
-
+        //apply sorting
         list = productManager.sortProducts(list, type);
 
         cout << "SORTED_RESULTS\n";
@@ -890,7 +898,7 @@ void processCommand(const string &command) {
         listCategoryProducts(category);
     }
 
-    else if (action == "ADD") {
+    else if (action == "ADD") {    //adding product quantity
         string productName;
         int quantity = 1;
 
@@ -904,7 +912,8 @@ void processCommand(const string &command) {
                 productName = productName.substr(0, pos);
             } catch (...) {}
         }
-
+        
+        //find product and add to cart
         Product *p = productManager.getProduct(productName);
         if (p)
             cart.addItem(p, quantity);
@@ -912,21 +921,22 @@ void processCommand(const string &command) {
             cout << "ERROR: Product not found\n";
     }
 
-    else if (action == "REMOVE") {
+    else if (action == "REMOVE") {    //remove product 
         string productName;
         getline(ss, productName);
         if (!productName.empty() && productName[0] == ' ') productName.erase(0,1);
         cart.removeItem(productName);
     }
 
-    else if (action == "SHOWCART") {
+    else if (action == "SHOWCART") {    //showcart
         cart.showCart();
     }
 
-    else if (action == "CHECKOUT") {
+    else if (action == "CHECKOUT") {    //checkout cart
         cart.checkout(productManager);
     }
 
+    // RECOMMEND product
     else if (action == "RECOMMEND") {
         string productName;
         getline(ss, productName);
@@ -939,6 +949,7 @@ void processCommand(const string &command) {
         } else {
             cout << "RECOMMENDATIONS\n";
 
+             // Print product name + price if found in list
             for (const string &r : recs) {
                 Product *p = productManager.getProduct(r);
                 if (p)
@@ -961,6 +972,7 @@ void processCommand(const string &command) {
         cout << "PRODUCTS_END\n";
     }
 
+        //filter all products
     else if (action == "LISTALLFILTER") {
         string fs;
         getline(ss, fs);
@@ -988,7 +1000,7 @@ void processCommand(const string &command) {
 }
 
 int main() {
-    initializeSystem();
+    initializeSystem();    //load everything
 
     ifstream inputFile("input.txt");
     ofstream outputFile("output.txt");
@@ -998,19 +1010,19 @@ int main() {
         return 1;
     }
 
-    streambuf *buf = cout.rdbuf();
+    streambuf *buf = cout.rdbuf();    // Redirect cout to output.txt
     cout.rdbuf(outputFile.rdbuf());
 
-    string command;
+    string command;    //reading commands one at a time
     while (getline(inputFile, command)) {
         if (!command.empty() && command[0] != '#')
             processCommand(command);
     }
 
-    cout.rdbuf(buf);
+    cout.rdbuf(buf); //restore original cout
     inputFile.close();
     outputFile.close();
 
-    cart.saveToFile();
+    cart.saveToFile();    // save cart before exit
     return 0;
 }
