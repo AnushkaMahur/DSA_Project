@@ -4,15 +4,17 @@ import time
 
 class BackendInterface:
     def __init__(self, cpp_executable, input_file, output_file):
+        # Store paths for backend executable and I/O files
         self.cpp_executable = cpp_executable
         self.input_file = input_file
         self.output_file = output_file
 
     def execute_command(self, command):
         try:
+            # Write the command to input file so C++ backend can read it
             with open(self.input_file, 'w', encoding='utf-8') as f:
                 f.write(command.strip() + '\n')
-
+            # Clear old backend output before running new command
             with open(self.output_file, 'w', encoding='utf-8') as f:
                 f.write('')
 
@@ -23,7 +25,7 @@ class BackendInterface:
 
             if result.returncode != 0:
                 return {"error": result.stderr.strip() or "Execution failed"}
-
+            # Small delay to ensure backend finishes writing output file
             time.sleep(0.1)
 
             with open(self.output_file, 'r', encoding='utf-8') as f:
@@ -35,18 +37,22 @@ class BackendInterface:
             return {"error": "Backend timeout"}
         except FileNotFoundError:
             return {"error": f"C++ executable not found: {self.cpp_executable}"}
+        # General fallback for unexpected errors
         except Exception as e:
             return {"error": str(e)}
 
     def parse_output(self, output, command):
+        # Convert full output into list of lines
         lines = output.strip().split('\n')
         if not lines or not output.strip():
             return {"error": "No output from backend"}
+
+        # Backend reports errors with ERROR:
         if lines[0].startswith("ERROR"):
             return {"error": lines[0].replace("ERROR: ", "")}
 
         cmd = command.strip().upper()
-
+        # Different commands produce different kinds of formatted output
         if "SEARCHFILTER" in cmd:
             return self._parse_search_results_extended(lines)
 
@@ -78,6 +84,7 @@ class BackendInterface:
         return {"output": output}
 
     def _extract_product_extended(self, parts):
+         # Helper function for reading product fields with brand included
         name = parts[0]
         price = float(parts[1])
         stock = int(parts[2])
@@ -95,7 +102,7 @@ class BackendInterface:
         products = []
         if lines[0] != "SORTED_RESULTS":
             return {"products": []}
-
+         # Loop through sorted product block
         for line in lines[1:]:
             if line == "SORTED_END":
                 break
@@ -106,6 +113,7 @@ class BackendInterface:
         return {"products": products}
 
     def _parse_search_results_extended(self, lines):
+        # Extended search with filtering options
         if lines[0] == "NO_RESULTS":
             return {"products": []}
 
@@ -132,6 +140,7 @@ class BackendInterface:
         return {"products": products}
 
     def _parse_search_results(self, lines):
+        # Basic search used for normal product queries
         if lines[0] == "NO_RESULTS":
             return {"products": []}
 
@@ -167,6 +176,7 @@ class BackendInterface:
         return {"products": products}
 
     def _parse_cart(self, lines):
+         # If backend says cart empty, return directly
         if lines[0] == "CART_EMPTY":
             return {"items": [], "total": 0.0}
 
@@ -177,6 +187,8 @@ class BackendInterface:
                 if line == "CART_END":
                     continue
                 if line.startswith("TOTAL:"):
+
+                    # Extract cart total shown by backend
                     total = float(line.split(":")[1].strip())
                     break
                 parts = line.split('|')
@@ -190,6 +202,7 @@ class BackendInterface:
         return {"items": items, "total": total}
 
     def _parse_checkout(self, lines):
+        # Successful checkout response
         if lines[0] == "CHECKOUT_SUCCESS":
             total = 0.0
             if len(lines) > 1 and lines[1].startswith("TOTAL_PAID:"):
@@ -198,6 +211,7 @@ class BackendInterface:
         return {"success": False, "error": lines[0]}
 
     def _parse_recommendations(self, lines):
+        # No recommended products
         if lines[0] == "NO_RECOMMENDATIONS":
             return {"recommendations": []}
 
@@ -215,6 +229,7 @@ class BackendInterface:
         return {"recommendations": recs}
 
     def _parse_autocomp(self, lines):
+        # No autocomplete suggestions
         if lines[0] == "NO_AUTOCOMP":
             return {"suggestions": []}
 
@@ -228,6 +243,7 @@ class BackendInterface:
         return {"suggestions": results}
 
     def _parse_cart_action(self, lines):
+        # Feedback for add/remove actions
         if lines[0].startswith("SUCCESS"):
             return {"success": True, "message": lines[0].replace("SUCCESS: ", "")}
         elif lines[0].startswith("ERROR"):
@@ -238,4 +254,5 @@ class BackendInterface:
         return self.execute_command(f"LISTALLFILTER {filter_string}")
 
     def search_filter(self, query, filter_string):
+        # Send combined query + filter to backend
         return self.execute_command(f"SEARCHFILTER {query} | {filter_string}")
